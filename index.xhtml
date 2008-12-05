@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>CSS Transitions Implemented by jQuery Animations</title>
+	
+    <script type="text/javascript">
+    var xblConsole = window.console;
+    </script>
+    
+    <style type="text/css">
+    body > #foo {
+        background-color:#EEE;
+        color:black;
+        padding:5px;
+        width:50%;
+        
+        -webkit-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+        -webkit-transition-duration:0.5s;
+        -moz-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+        -moz-transition-duration:0.5s;
+        transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+        transition-duration:0.5s;
+    }
+    
+    #foo:target {
+        /*width:70%;
+        background-color:orange;
+        color:green;
+        padding:15px;*/
+        padding:20px;
+    }
+    #foo.on {
+        /*width:80%;
+        background-color:cyan;
+        color:purple;
+        padding:30px;*/
+        color:red;
+    }
+    #foo:hover {
+        /*width:60%;
+        background-color:yellow;
+        color:red;
+        padding:10px;*/
+        background-color:lime;
+    }
+    #foo:active {
+        /*width:70%;
+        background-color:lime;
+        color:blue;
+        padding:20px;*/
+        width:80%;
+    }
+    
+    </style>
+</head>
+<body>
+	<h1>CSS Transitions Implemented by jQuery Animations</h1>
+    
+    <nav>
+        <a href="#foo">Increase padding</a><br />
+        <button onclick="if($('#foo').hasClass('on')) $('#foo').removeClass('on'); else $('#foo').addClass('on'); ">Toggle red text</button>
+    </nav>
+    
+    
+    
+    <p id="foo">
+        Foo: This is a paragraph that is to be transitioned.<br />
+        Hover over me to give me a lime background.<br />
+        Click on me to make me wide.
+    </p>
+	
+	<hr />
+	<address>
+		<a href="http://weston.ruter.net/">Weston Ruter</a>, <a href="http://shepherd-interactive.com/">Shepherd Interactive</a>, December 2008
+	</address>
+	
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.js"></script>
+	<script type="text/javascript" src="jquery.color.js"></script>
+	<script type="text/javascript" src="jquery.css-transitions.js"></script>
+</body>
+</html>
