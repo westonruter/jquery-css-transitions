@@ -110,8 +110,6 @@ $(document.styleSheets).each(function(){
 		};
 		
 		//Parse out the transition properties that exist in this rule
-		var transitionProperty;
-		var transitionDuration; //ms
 		var regexpParseStyles = '(?:^|})\\s*' + RegExpEscape(this.selectorText) + '\\s*{((?:[^{}"]+|"[^"]+")+)}';
 		var matches = sheetCssText.match(new RegExp(regexpParseStyles));
 		if(matches){
@@ -152,15 +150,32 @@ $(document.styleSheets).each(function(){
 		}
 		
 		//Store all of the styles in this rule so that they can be accessed by the bindings later
+		var style = this.style;
+		//$(rule.transitionProperty).each(function(){
+		//	console.info(this)
+		//	if(style[this]){
+		//		rule.style[this] = style[this];
+		//	}
+		//});
+
+		//Store all of the styles in this rule so that they can be accessed by the bindings later
 		for(var i = 0; this.style[i]; i++){
 			var jsName = this.style[i].replace(/-([a-z])/g, cssNameToJsNameCallback);
-			if(this.style[jsName])
+			if(jsName == 'paddingLeftValue' || jsName == 'paddingRightValue')
+				jsName = jsName.replace(/Value$/, '');
+			
+			if(this.style[jsName]){
 				rule.style[jsName] = this.style[jsName];
+			}
+			//else {
+			//	console.warn(jsName)
+			//}
 		}
+
+		//console.warn(rule.style)
 		cssTransitionRules[bindingIndex] = rule;
 		
 		//Create a function for adding a binding to this rule; this function is called once the binding XML file is successfully loaded in order to avoid flash of unstyled content
-		var style = this.style;
 		bindingAppliers.push(
 			(function(i){
 				return function(){

@@ -12,6 +12,8 @@ try {
 				var i = <?php echo $i ?>;
 				
 				var $this = jQuery(this);
+				xblConsole.info(cssTransitionRules[i].selectorText)
+				//xblConsole.info(cssTransitionRules[i].transitionProperty)
 				
 				//Make sure that the transition property and duration are stored for this element, because it
 				//  may have been dynamically generated
@@ -26,16 +28,26 @@ try {
 				var transitionStyle = {};
 				var currentStyle = {};
 				var previousStyle = $this.data('transitionPreviousStyle') || {};
+				//xblConsole.info(cssTransitionRules[i]);
 				jQuery(transitionProperties).each(function(){
 					currentStyle[this] = $this.css(this);
-					if(!that.style[this])
+					if(!that.style[this]){
 						$this.css(this, currentStyle[this]);
-					if(cssTransitionRules[i].style[this])
+					}
+					if(cssTransitionRules[i].style[this]){
+						//xblConsole.info(this, currentStyle[this])
 						transitionStyle[this] = cssTransitionRules[i].style[this];
+					}
+					else {
+						//xblConsole.warn(this, currentStyle[this])
+					}
+					//xblConsole.warn(cssTransitionRules[i].style)
 					
 					//else if(previousStyle[this])
 					//	transitionStyle[this] = previousStyle[this];
 				});
+				//xblConsole.info(transitionStyle)
+				//xblConsole.warn(transitionProperties)
 				
 				$this.stop().animate(transitionStyle, $this.data('transitionDuration'));
 				
@@ -44,7 +56,7 @@ try {
 				}
 				$this.data('transitionPreviousStyle', previousStyle);
 				
-				xblConsole.info(cssTransitionRules[i].selectorText)
+				//xblConsole.info(cssTransitionRules[i].selectorText)
 				
 				//xblConsole.info(cssTransitionRules[i].selectorText)
 				//console.info($this.data('transitionProperty'));
