@@ -90,12 +90,7 @@ $(document.styleSheets).each(function(){
 	sheetCssText = sheetCssText.replace(/\/\*(.|\s)*?\*\//g, ' ');
 	sheetCssText = sheetCssText.replace(/\s+/g, ' ');
 	
-	//console.info(cssText.match(/\s*((?:[^{}"]+|"[^"]+")+)/))
-	
 	//We now need to parse the cssText for the transition properties and their corresponding selectors
-	var selectorTransitionProperties = {};
-	//sheetCssText.match(/transition-property/);
-	
 	
 	//Note: For each rule that contains transition-property, we can set the styles on the element itself
 	//      so that they can't be overridden; and then for IE we can apply the new ones that come into
@@ -109,8 +104,9 @@ $(document.styleSheets).each(function(){
 		var rule = {
 			selectorText:this.selectorText,
 			style:{},
+			previousStyle:{},
 			transitionProperty:[],
-			transitionDuration:0
+			transitionDuration:0 //ms
 		};
 		
 		//Parse out the transition properties that exist in this rule
@@ -122,7 +118,6 @@ $(document.styleSheets).each(function(){
 			//Get the comma separated transition-property 
 			var transitionPropertyMatch = matches[1].match(/transition-property\s*:\s*(.+?)\s*;/);
 			if(transitionPropertyMatch){
-				//transitionProperty = [];
 				$(transitionPropertyMatch[1].split(/\s*,\s*/)).map(function(){
 					rule.transitionProperty.push(this.replace(/-([a-z])/, cssNameToJsNameCallback));
 				});
@@ -137,15 +132,24 @@ $(document.styleSheets).each(function(){
 					rule.transitionDuration = parseFloat(transitionDurationMatch[1]);
 			}
 		}
-		console.info(rule)
 		
-		
-		//console.warn(regexpParseStyles)
-		//console.info();
-		//console.info(RegExpEscape(this.selectorText))
-		
-		
-		//Note: For IE we'll have to parse 
+		//Save the transition property and duration in the target element so that it can cascade
+		if(rule.transitionProperty || rule.transitionDuration){
+			//Try because some selectors are not supported by jQuery (e.g. the pseudo classes)
+			try {
+				var els = jQuery(this.selectorText);
+				if(rule.transitionProperty.length){
+					els.data('transitionProperty', rule.transitionProperty);
+				}
+				if(rule.transitionDuration){
+					els.data('transitionDuration', rule.transitionDuration);
+				}
+			}
+			catch(e){
+				if(window.console)
+					console.error("Unable to use selector: " + this.selectorText);
+			}
+		}
 		
 		//Store all of the styles in this rule so that they can be accessed by the bindings later
 		for(var i = 0; this.style[i]; i++){
@@ -167,10 +171,6 @@ $(document.styleSheets).each(function(){
 		
 		bindingIndex++;
 	});
-	
-	
-	//
-	//console.info(this.cssRules)
 	
 });
 
