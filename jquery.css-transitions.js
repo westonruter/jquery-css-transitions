@@ -160,12 +160,12 @@ $(document.styleSheets).each(function(){
 
 		//Store all of the styles in this rule so that they can be accessed by the bindings later
 		for(var i = 0; this.style[i]; i++){
-			var jsName = this.style[i].replace(/-([a-z])/g, cssNameToJsNameCallback);
-			if(jsName == 'paddingLeftValue' || jsName == 'paddingRightValue')
-				jsName = jsName.replace(/Value$/, '');
+			var name = this.style[i].replace(/-([a-z])/g, cssNameToJsNameCallback);
+			if(name == 'paddingLeftValue' || name == 'paddingRightValue')
+				name = name.replace(/Value$/, '');
 			
-			if(this.style[jsName]){
-				rule.style[jsName] = this.style[jsName];
+			if(this.style[name]){
+				rule.style[name] = this.style[name];
 			}
 			//else {
 			//	console.warn(jsName)

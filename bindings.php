@@ -11,56 +11,61 @@ echo '<?'.'xml version="1.0"?'.'>';?>
 try {
 				var i = <?php echo $i ?>;
 				
-				var $this = jQuery(this);
+				var el = this;
+				var $el = jQuery(el);
 				xblConsole.info(cssTransitionRules[i].selectorText)
 				//xblConsole.info(cssTransitionRules[i].transitionProperty)
 				
 				//Make sure that the transition property and duration are stored for this element, because it
 				//  may have been dynamically generated
 				if(cssTransitionRules[i].transitionProperty.length)
-					$this.data('transitionProperty', cssTransitionRules[i].transitionProperty);
+					$el.data('transitionProperty', cssTransitionRules[i].transitionProperty);
 				if(cssTransitionRules[i].transitionDuration)
-					$this.data('transitionDuration', cssTransitionRules[i].transitionDuration);
+					$el.data('transitionDuration', cssTransitionRules[i].transitionDuration);
 				
 				//For each of the transition properties, set the style to the current property so that subsequent rules don't override immediately
-				var transitionProperties = $this.data('transitionProperty');
-				var that = this;
+				var transitionProperties = $el.data('transitionProperty');
 				var transitionStyle = {};
 				var currentStyle = {};
-				var previousStyle = $this.data('transitionPreviousStyle') || {};
+				var previousStyle = $el.data('transitionPreviousStyle') || {};
 				//xblConsole.info(cssTransitionRules[i]);
 				jQuery(transitionProperties).each(function(){
-					currentStyle[this] = $this.css(this);
-					if(!that.style[this]){
-						$this.css(this, currentStyle[this]);
+					currentStyle[this] = $el.css(this);
+					if(!el.style[this]){
+						$el.css(this, currentStyle[this]);
 					}
 					if(cssTransitionRules[i].style[this]){
 						//xblConsole.info(this, currentStyle[this])
 						transitionStyle[this] = cssTransitionRules[i].style[this];
 					}
-					else {
-						//xblConsole.warn(this, currentStyle[this])
+					else if(previousStyle[this]){
+						transitionStyle[this] = previousStyle[this];
 					}
+					
 					//xblConsole.warn(cssTransitionRules[i].style)
 					
-					//else if(previousStyle[this])
-					//	transitionStyle[this] = previousStyle[this];
 				});
 				//xblConsole.info(transitionStyle)
 				//xblConsole.warn(transitionProperties)
 				
-				$this.stop().animate(transitionStyle, $this.data('transitionDuration'));
+				$el.stop().animate(transitionStyle, $el.data('transitionDuration'));
 				
 				for(var name in currentStyle){
 					previousStyle[name] = currentStyle[name];
 				}
-				$this.data('transitionPreviousStyle', previousStyle);
+				$el.data('transitionPreviousStyle', previousStyle);
+				
+				
+				//#### We really need to find out when a binding is REMOVED
+				//document.defaultView.getComputedStyle($('#foo')[0], null).MozBinding
+				//We does this only return 1? It should return a list of bindings that are applied!
+				//We need to get all of the bindings that are applied in the cascade
 				
 				//xblConsole.info(cssTransitionRules[i].selectorText)
 				
 				//xblConsole.info(cssTransitionRules[i].selectorText)
-				//console.info($this.data('transitionProperty'));
-				//console.info($this.data('transitionDuration'));
+				//console.info($el.data('transitionProperty'));
+				//console.info($el.data('transitionDuration'));
 				
 				
 				//Note: This doesn't work with :not(:target)
@@ -81,13 +86,20 @@ try {
 }
 			]]>
 			</constructor>
+			<field name="cssTransitionRule<?php echo $i; ?>">
+			"coolness"
+			</field>
+			<!--
+			We cannot use the destructor to determine when a rule is removed. See Bug 83635 -  XBL binding not deleted on removal from document tree  https://bugzilla.mozilla.org/show_bug.cgi?id=83635
+			This sucks.
+			-->
 			<destructor>
 			<![CDATA[
 				if(xblConsole)
 					xblConsole.info('destruct');
-				var $this = jQuery(this);
-				$this.removeData('transitionProperty');
-				$this.removeData('transitionDuration')
+				var $el = jQuery(this);
+				$el.removeData('transitionProperty');
+				$el.removeData('transitionDuration')
 			]]>
 			</destructor>
 		</implementation>
