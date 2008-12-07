@@ -15,6 +15,14 @@ try {
 				
 				var el = this;
 				var $el = jQuery(el);
+				var isInitialized = !!$el.data('transitionInitialized');
+
+				//Here we need to see if cssTransitionRules[i].selectorText is actually 
+				if(isInitialized){
+					
+				}
+				
+
 				xblConsole.info(cssTransitionRules[i].selectorText)
 				//xblConsole.info(cssTransitionRules[i].transitionProperty)
 				
@@ -29,7 +37,6 @@ try {
 				
 				//For each of the transition properties, set the style to the current property so that subsequent rules don't override immediately
 				var transitionProperties = $el.data('transitionProperty');
-				console.warn(transitionProperties)
 				if(!transitionProperties)
 					return;
 				var transitionDuration = $el.data('transitionDuration');
@@ -99,15 +106,7 @@ try {
 				//	var selectorWithoutTarget = cssTransitionRules[i].selectorText.replace(/:target/, '');
 				//}
 				
-				
-				//var selector = "<?php echo urldecode(stripslashes(@$_GET['selector'])) ?>";
-				if(xblConsole){
-					//xblConsole.info(cssTransitionRules[i].selectorText);
-					//xblConsole.info(cssTransitionRules[i].transitionProperty);
-				}
-}catch(e){
-	xblConsole.error(e)
-}
+}catch(e){xblConsole.error(e)}
 			]]>
 			</constructor>
 			<!--
