@@ -24,9 +24,12 @@ try {
 					$el.data('transitionProperty', cssTransitionRules[i].transitionProperty);
 				if(cssTransitionRules[i].transitionDuration)
 					$el.data('transitionDuration', cssTransitionRules[i].transitionDuration);
+					
+					//@todo: We need to get the transition property of this rule, not of the initial rule so that we can TURN ON animateions
 				
 				//For each of the transition properties, set the style to the current property so that subsequent rules don't override immediately
 				var transitionProperties = $el.data('transitionProperty');
+				console.warn(transitionProperties)
 				if(!transitionProperties)
 					return;
 				var transitionDuration = $el.data('transitionDuration');
@@ -37,7 +40,7 @@ try {
 				//var previousStyle = $el.data('transitionPreviousStyle') || {};
 				//xblConsole.info(cssTransitionRules[i]);
 				
-				if(transitionProperties[0] == 'all'){
+				if(transitionProperties[0] == 'all' || transitionProperties[0] == 'none'){
 					for(var name in cssTransitionRules[i].style){
 						if(!el.style[name])
 							$el.css(name, $el.css(name));

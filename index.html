@@ -24,33 +24,36 @@
         padding-right:5px;
         width:50%;
         
-        -webkit-transition-property:all;
+        -webkit-transition-property:none;
         -webkit-transition-duration:0.5s;
-        -moz-transition-property:all;
+        -moz-transition-property:none;
         -moz-transition-duration:0.5s;
-        transition-property:all;
+        transition-property:none;
         transition-duration:0.5s;
     }
     
-    #bar:target {-webkit-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+    #bar:target {
         padding:10px;
         background-color:blue;
         color:white;
         width:80%;
     }
-    #bar.on {-webkit-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+    #bar.on {
+        -webkit-transition-property:all;
+        -moz-transition-property:all;
+        transition-property:all;
         padding:40px 15px;
         background-color:pink;
         color:red;
         width:70%;
     }
-    #bar:hover {-webkit-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+    #bar:hover {
         padding:25px;
         background-color:cyan;
         color:blue;
         width:80%;
     }
-    #bar:active {-webkit-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+    #bar:active {
         padding:35px;
         background-color:yellow;
         color:green;
