@@ -19,6 +19,10 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+@todo We need to not add a behavior to EVERY rule, just those which provide the properties; if every relevant rule included transition-property:inherit then we could sniff that
+@todo Implement transition-delay and transition-timing-function
+@todo Impement transition events?
  */
 
 var cssTransitionRules = [];
