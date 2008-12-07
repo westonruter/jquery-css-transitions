@@ -9,6 +9,49 @@
     
     <style type="text/css">
     
+    
+    body > #bar {
+        background-color:#EEE;
+        color:black;
+        padding-top:5px;
+        padding-bottom:5px;
+        padding-left:5px;
+        padding-right:5px;
+        width:50%;
+        
+        -webkit-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+        -webkit-transition-duration:0.5s;
+        -moz-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+        -moz-transition-duration:0.5s;
+        transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+        transition-duration:0.5s;
+    }
+    
+    #bar:target {
+        padding:10px;
+        background-color:blue;
+        color:white;
+        width:80%;
+    }
+    #bar.on {
+        padding:40px 15px;
+        background-color:pink;
+        color:red;
+        width:70%;
+    }
+    #bar:hover {
+        padding:25px;
+        background-color:cyan;
+        color:blue;
+        width:80%;
+    }
+    #bar:active {
+        padding:35px;
+        background-color:yellow;
+        color:green;
+        width:40%;
+    }
+    
     body > #foo {
         background-color:#EEE;
         color:black;
@@ -66,6 +109,24 @@
 <body>
 	<h1>CSS Transitions Implemented by jQuery Animations</h1>
     
+    <h2>Bar</h2>
+    <p>The most sophisticated CSS rules are ones in which all of the transition properties are defined in each of the rules. Additionally, only one transition rule can be applied
+    at a time; the rules are mutually exclusive. If if a rule with higher precedent overrides another rule, then the other rule will not be applied as long as it exists. No cascading.
+    Do not use short hand properties for the transition-property values.</p>
+    <nav>
+        <a href="#bar">Click for :target rule</a><br />
+        <button onclick="if($('#bar').hasClass('on')) $('#bar').removeClass('on'); else $('#bar').addClass('on'); ">Click for .on rule</button>
+    </nav>
+    <p id="bar">
+        Bar: This is a paragraph that is to be transitioned.<br>
+        Hover over for: padding 5px; bgcolor cyan; text blue; width 80<br>
+        Click for padding 30px; bgcolor yellow; text green; width:40
+    </p>
+
+
+    <hr>
+    <h2>Foo</h2>
+    <p>This will not work because Mozilla's XBL doesn't support destructors firing when CSS classes change</p>
     <nav>
         <a href="#foo">Increase padding</a><br />
         <button onclick="if($('#foo').hasClass('on')) $('#foo').removeClass('on'); else $('#foo').addClass('on'); ">Toggle red text</button>
@@ -78,7 +139,7 @@
         Hover over me to give me a lime background.<br />
         Click on me to make me wide.
     </p>
-	
+    
 	<hr />
 	<address>
 		<a href="http://weston.ruter.net/">Weston Ruter</a>, <a href="http://shepherd-interactive.com/">Shepherd Interactive</a>, December 2008
