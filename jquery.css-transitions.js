@@ -104,7 +104,7 @@ $(document.styleSheets).each(function(){
 		var rule = {
 			selectorText:this.selectorText,
 			style:{},
-			previousStyle:{},
+			//previousStyle:{},
 			transitionProperty:[],
 			transitionDuration:0 //ms
 		};

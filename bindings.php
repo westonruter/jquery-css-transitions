@@ -26,21 +26,22 @@ try {
 				//For each of the transition properties, set the style to the current property so that subsequent rules don't override immediately
 				var transitionProperties = $el.data('transitionProperty');
 				var transitionStyle = {};
-				var currentStyle = {};
-				var previousStyle = $el.data('transitionPreviousStyle') || {};
+				//var currentStyle = {};
+				//var previousStyle = $el.data('transitionPreviousStyle') || {};
 				//xblConsole.info(cssTransitionRules[i]);
 				jQuery(transitionProperties).each(function(){
-					currentStyle[this] = $el.css(this);
+					//currentStyle[this] = $el.css(this);
 					if(!el.style[this]){
-						$el.css(this, currentStyle[this]);
+						//$el.css(this, currentStyle[this]);
+						$el.css(this, $el.css(this));
 					}
 					if(cssTransitionRules[i].style[this]){
 						//xblConsole.info(this, currentStyle[this])
 						transitionStyle[this] = cssTransitionRules[i].style[this];
 					}
-					else if(previousStyle[this]){
-						transitionStyle[this] = previousStyle[this];
-					}
+					//else if(previousStyle[this]){
+					//	transitionStyle[this] = previousStyle[this];
+					//}
 					
 					//xblConsole.warn(cssTransitionRules[i].style)
 					
@@ -50,10 +51,10 @@ try {
 				
 				$el.stop().animate(transitionStyle, $el.data('transitionDuration'));
 				
-				for(var name in currentStyle){
-					previousStyle[name] = currentStyle[name];
-				}
-				$el.data('transitionPreviousStyle', previousStyle);
+				//for(var name in currentStyle){
+				//	previousStyle[name] = currentStyle[name];
+				//}
+				//$el.data('transitionPreviousStyle', previousStyle);
 				
 				
 				//#### We really need to find out when a binding is REMOVED
@@ -86,14 +87,11 @@ try {
 }
 			]]>
 			</constructor>
-			<field name="cssTransitionRule<?php echo $i; ?>">
-			"coolness"
-			</field>
 			<!--
 			We cannot use the destructor to determine when a rule is removed. See Bug 83635 -  XBL binding not deleted on removal from document tree  https://bugzilla.mozilla.org/show_bug.cgi?id=83635
 			This sucks.
 			-->
-			<destructor>
+			<!--<destructor>
 			<![CDATA[
 				if(xblConsole)
 					xblConsole.info('destruct');
@@ -101,7 +99,7 @@ try {
 				$el.removeData('transitionProperty');
 				$el.removeData('transitionDuration')
 			]]>
-			</destructor>
+			</destructor>-->
 		</implementation>
 	</binding>
 <?php endfor; ?>
