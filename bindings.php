@@ -10,6 +10,8 @@ echo '<?'.'xml version="1.0"?'.'>';?>
 			<![CDATA[
 try {
 				var i = <?php echo $i ?>;
+				//The following code needs to be placed into a global jQuery.cssTransitions.activate(i, this)
+				//To keep all code possible in the JS file; we also need to put cssTransitionRules into jQuery.cssTransitions.rules
 				
 				var el = this;
 				var $el = jQuery(el);
