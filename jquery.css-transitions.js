@@ -21,6 +21,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
 @todo We need to not add a behavior to EVERY rule, just those which provide the properties; if every relevant rule included transition-property:inherit then we could sniff that
+@todo Implement transition-property:all? This would require the use of SWAP?
 @todo Implement transition-delay and transition-timing-function
 @todo Impement transition events?
  */

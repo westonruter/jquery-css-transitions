@@ -27,31 +27,49 @@ try {
 				
 				//For each of the transition properties, set the style to the current property so that subsequent rules don't override immediately
 				var transitionProperties = $el.data('transitionProperty');
+				if(!transitionProperties)
+					return;
+				var transitionDuration = $el.data('transitionDuration');
+				if(!transitionDuration || transitionProperties[0] == 'none')
+					transitionDuration = 0;
 				var transitionStyle = {};
 				//var currentStyle = {};
 				//var previousStyle = $el.data('transitionPreviousStyle') || {};
 				//xblConsole.info(cssTransitionRules[i]);
-				jQuery(transitionProperties).each(function(){
-					//currentStyle[this] = $el.css(this);
-					if(!el.style[this]){
-						//$el.css(this, currentStyle[this]);
-						$el.css(this, $el.css(this));
+				
+				if(transitionProperties[0] == 'all'){
+					for(var name in cssTransitionRules[i].style){
+						if(!el.style[name])
+							$el.css(name, $el.css(name));
+						transitionStyle[name] = cssTransitionRules[i].style[name];
 					}
-					if(cssTransitionRules[i].style[this]){
-						//xblConsole.info(this, currentStyle[this])
-						transitionStyle[this] = cssTransitionRules[i].style[this];
-					}
-					//else if(previousStyle[this]){
-					//	transitionStyle[this] = previousStyle[this];
-					//}
+				}
+				//Only transition the properties that were explicitly provided
+				else {
+					jQuery(transitionProperties).each(function(){
+						//currentStyle[this] = $el.css(this);
+						if(!el.style[this]){
+							//$el.css(this, currentStyle[this]);
+							$el.css(this, $el.css(this));
+						}
+						if(cssTransitionRules[i].style[this]){
+							//xblConsole.info(this, currentStyle[this])
+							transitionStyle[this] = cssTransitionRules[i].style[this];
+						}
+						//else if(previousStyle[this]){
+						//	transitionStyle[this] = previousStyle[this];
+						//}
+						
+						//xblConsole.warn(cssTransitionRules[i].style)
+						
+					});
 					
-					//xblConsole.warn(cssTransitionRules[i].style)
-					
-				});
+				}
+				
 				//xblConsole.info(transitionStyle)
 				//xblConsole.warn(transitionProperties)
 				
-				$el.stop().animate(transitionStyle, $el.data('transitionDuration'));
+				$el.stop().animate(transitionStyle, transitionDuration);
 				
 				//for(var name in currentStyle){
 				//	previousStyle[name] = currentStyle[name];
