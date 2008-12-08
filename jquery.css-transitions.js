@@ -24,7 +24,13 @@
 @todo Implement transition-timing-function
 @todo We need to support the shorthand notation for transitions
 @todo Impement transition events?
+@todo We could have an option to restrict all transitions to one CSS file (more HTTP load, but less computation load)
  */
+
+if(window.console && console.profile){
+	console.profile("CSS Transitions");
+	window.onload = function(){console.profileEnd("CSS Transitions");}
+}
 
 jQuery(function($){
 	
@@ -70,8 +76,8 @@ $(document.styleSheets).each(function(){
 			return;
 	}
 	
-	//Remove all comments and normalize whitespace
-	sheetCssText = sheetCssText.replace(/\/\*(.|\s)*?\*\//g, ' ');
+	//Remove all comments and normalize whitespace (except for transition directive comments)
+	sheetCssText = sheetCssText.replace(/\/\*(?!@\s*transition-rule\s*@\*\/)(.|\s)*?\*\//g, ' ');
 	sheetCssText = sheetCssText.replace(/\s+/g, ' ');
 	
 	//We now need to parse the cssText for the transition properties and their corresponding selectors
@@ -84,9 +90,12 @@ $(document.styleSheets).each(function(){
 	//       and we need to find to opacity? Or we can just use the filter: property
 	
 	var rules = this.cssRules ? this.cssRules : this.rules;
-	$(rules).each(function(){
-		var rule = {
-			selectorText:this.selectorText,
+	//$(rules).each(function(){
+	for(var i = 0; i < rules.length; i++){
+		var that = rules[i];
+		
+		var ruleInfo = {
+			selectorText:that.selectorText,
 			style:{},
 			transitionProperty:['all'],
 			transitionDuration:0, //ms
@@ -96,9 +105,13 @@ $(document.styleSheets).each(function(){
 		};
 		
 		//Parse out the transition styles that exist in this rule
-		var regexpParseStyles = '(?:^|})\\s*' + regExpEscape(this.selectorText) + '\\s*{((?:[^{}"]+|"[^"]+")+)}';
+		var regexpParseStyles = '(?:^|})\\s*' + regExpEscape(that.selectorText) + '\\s*{((?:[^{}"]+|"[^"]+")+)}';
 		var ruleMatches = sheetCssText.match(new RegExp(regexpParseStyles));
 		if(ruleMatches){
+			//If the /*@ transition-rule @*/ directive doesn't appear in the CSS, then skip
+			if(ruleMatches[1].indexOf('transition-rule') == -1)
+				continue; //return;
+			
 			var matches;
 			
 			//Parse shorthand "transition:" property [<transition-property> || <transition-duration> || <transition-timing-function> || <transition-delay>]
@@ -110,24 +123,24 @@ $(document.styleSheets).each(function(){
 			//Parse comma-separated "transition-property:" 
 			matches = ruleMatches[1].match(/transition-property\s*:\s*(.+?)\s*(?:;|$)/i);
 			if(matches){
-				rule.transitionProperty.length = 0;
+				ruleInfo.transitionProperty.length = 0;
 				$(matches[1].split(/\s*,\s*/)).map(function(){
-					rule.transitionProperty.push(this.replace(/-([a-z])/, cssNameToJsNameCallback));
+					ruleInfo.transitionProperty.push(this.replace(/-([a-z])/, cssNameToJsNameCallback));
 				});
-				if(rule.transitionProperty[0] == 'none')
-					return;
+				if(ruleInfo.transitionProperty[0] == 'none')
+					continue; //return;
 			}
 			
 			//Parse "transition-duration:" which is in seconds or milliseconds
 			matches = ruleMatches[1].match(/transition-duration\s*:\s*(\d*\.?\d*)(ms|s)\s*(?:;|$)/i);
 			if(matches){
-				rule.transitionDuration = (matches[2] == 's' ? parseFloat(matches[1])*1000 : parseFloat(matches[1]));
+				ruleInfo.transitionDuration = (matches[2] == 's' ? parseFloat(matches[1])*1000 : parseFloat(matches[1]));
 			}
 			
 			//Parse "transition-delay:" 
 			matches = ruleMatches[1].match(/transition-delay\s*:\s*(\d*\.?\d*)(ms|s)\s*(?:;|$)/i);
 			if(matches){
-				rule.transitionDelay = (matches[2] == 's' ? parseFloat(matches[1])*1000 : parseFloat(matches[1]));
+				ruleInfo.transitionDelay = (matches[2] == 's' ? parseFloat(matches[1])*1000 : parseFloat(matches[1]));
 			}
 			
 			//Parse "transition-timing-function:" (ease | linear | ease-in | ease-out | ease-in-out | cubic-bezier(<number>, <number>, <number>, <number>))
@@ -136,67 +149,73 @@ $(document.styleSheets).each(function(){
 				throw Error("'transition-timing-function:' is not currently supported");
 			}
 		}
+		//Bad rule
+		else {
+			continue; //return;
+		}
 		
 		//This rule is the transition base state if transition-property is not "none" and if transition-delay and transition-duration are not zero
-		if(rule.transitionProperty[0] != 'none' && (rule.transitionDelay || rule.transitionDuration)){
+		if(ruleInfo.transitionProperty[0] != 'none' && (ruleInfo.transitionDelay || ruleInfo.transitionDuration)){
 			cssTransitions.baseRules.push({
-				selector:this.selectorText,
+				selector:that.selectorText,
 				index:ruleIndex
 			});
-			rule.isBaseRule = true;
+			ruleInfo.isBaseRule = true;
 		}
 		
 		//Instead of this, I was going to have 
 		//Save the transition property and duration in the target element so that it can cascade
-		//if(rule.transitionProperty || rule.transitionDuration){
+		//if(ruleInfo.transitionProperty || ruleInfo.transitionDuration){
 		//	//Try because some selectors are not supported by jQuery (e.g. the pseudo classes)
 		//	try {
-		//		var els = jQuery(this.selectorText);
-		//		if(rule.transitionProperty.length){
-		//			els.data('transitionProperty', rule.transitionProperty);
+		//		var els = jQuery(that.selectorText);
+		//		if(ruleInfo.transitionProperty.length){
+		//			els.data('transitionProperty', ruleInfo.transitionProperty);
 		//		}
-		//		if(rule.transitionDuration){
-		//			els.data('transitionDuration', rule.transitionDuration);
+		//		if(ruleInfo.transitionDuration){
+		//			els.data('transitionDuration', ruleInfo.transitionDuration);
 		//		}
 		//	}
 		//	catch(e){
 		//		if(window.console)
-		//			console.error("Unable to use selector: " + this.selectorText);
+		//			console.error("Unable to use selector: " + that.selectorText);
 		//	}
 		//}
 		
 
 		//Store all of the styles in this rule so that they can be accessed by the bindings later
 		//var style = this.style;
-		for(var i = 0; this.style[i]; i++){
+		for(var j = 0; that.style[j]; j++){
 			//Convert the name from CSS format to JavaScript format and change make any additional name changes
-			var name = this.style[i].replace(/-([a-z])/g, cssNameToJsNameCallback);
+			var name = that.style[j].replace(/-([a-z])/g, cssNameToJsNameCallback);
 			if(name == 'paddingLeftValue' || name == 'paddingRightValue')
 				name = name.replace(/Value$/, '');
 			
-			//Save the style associated with this name
-			if(this.style[name])
-				rule.style[name] = this.style[name];
+			//Save the style associated with that name
+			if(that.style[name])
+				ruleInfo.style[name] = that.style[name];
 		}
 
 		//Store this rule and associate it with this ruleIndex (so that the binding can call up the rule that it was part of)
-		cssTransitions.rules[ruleIndex] = rule;
+		cssTransitions.rules[ruleIndex] = ruleInfo;
 		
 		//Create a function for adding a binding to this rule; this function is called once the binding XML file is successfully loaded in order to avoid flash of unstyled content
-		var that = this;
+		//var that = this;
+		
 		bindingAppliers.push(
-			(function(i){
+			(function(rule, i){
 				return function(){
-					that.style.MozBinding = "url('" + cssTransitions.bindingURL + "#rule" + i + "')";
+					rule.style.MozBinding = "url('" + cssTransitions.bindingURL + "#rule" + i + "')";
 				}
-			})(ruleIndex)
+			})(that, ruleIndex)
 		);
 		
 		ruleIndex++;
-	});
+	//});
+	}
 	
 });
-
+//console.info(bindingAppliers)
 
 //Function which is called by the behaviors whenever one is constructed
 cssTransitions.applyRule = function(el, ruleIndex){

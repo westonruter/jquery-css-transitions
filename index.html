@@ -8,6 +8,7 @@
     </script>
     
     <style type="text/css">
+    
     address {
         
     }
@@ -19,6 +20,8 @@
     }
     
     body > #bar {
+        /*@ transition-rule @*/
+        
         background-color:#EEE;
         color:black;
         padding-top:5px;
@@ -35,28 +38,32 @@
         transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
         transition-duration:0.5s;
         /*transition-delay:1s;*/
+        
     }
     
     #bar:target {
+        /*@ transition-rule @*/
         padding:10px;
         background-color:blue;
         color:white;
         width:80%;
-        /*@ transition-rule @*/
     }
     #bar.on {
+        /*@ transition-rule @*/
         padding:40px 15px;
         background-color:pink;
         color:red;
         width:70%;
     }
     #bar:hover {
+        /*@ transition-rule @*/
         padding:25px;
         background-color:cyan;
         color:blue;
         width:80%;
     }
     #bar:active {
+        /*@ transition-rule @*/
         padding:35px;
         background-color:yellow;
         color:green;
@@ -78,6 +85,8 @@
         -moz-transition-duration:0.5s;
         transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
         transition-duration:0.5s;
+        
+        /*@ transition-rule @*/
     }
     
     #foo:target {
@@ -86,6 +95,7 @@
         color:green;
         padding:15px;*/
         padding:20px 20px 20px 20px;
+        /*@ transition-rule @*/
     }
     /* This does not work; only one binding is set at a time */
     /*
@@ -99,6 +109,7 @@
         color:purple;
         padding:30px;*/
         color:red;
+        /*@ transition-rule @*/
     }
     #foo:hover {
         /*width:60%;
@@ -106,6 +117,7 @@
         color:red;
         padding:10px;*/
         background-color:lime;
+        /*@ transition-rule @*/
     }
     #foo:active {
         /*width:70%;
@@ -113,6 +125,7 @@
         color:blue;
         padding:20px;*/
         width:80%;
+        /*@ transition-rule @*/
     }
     
     </style>
