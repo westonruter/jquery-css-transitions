@@ -107,34 +107,36 @@ $(document.styleSheets).each(function(){
 			var matches;
 			
 			//Parse shorthand "transition:" property [<transition-property> || <transition-duration> || <transition-timing-function> || <transition-delay>]
-			matches = ruleMatches[1].match(/transition\s*:.+?;/i);
+			matches = ruleMatches[1].match(/transition\s*:.+?\s*(?:;|$)/i);
 			if(matches){
 				throw Error("'transition:' shorthand property is not currently supported");
 			}
 			
 			//Parse comma-separated "transition-property:" 
-			matches = ruleMatches[1].match(/transition-property\s*:\s*(.+?)\s*;/i);
+			matches = ruleMatches[1].match(/transition-property\s*:\s*(.+?)\s*(?:;|$)/i);
 			if(matches){
 				rule.transitionProperty.length = 0;
 				$(matches[1].split(/\s*,\s*/)).map(function(){
 					rule.transitionProperty.push(this.replace(/-([a-z])/, cssNameToJsNameCallback));
 				});
+				if(rule.transitionProperty[0] == 'none')
+					return;
 			}
 			
 			//Parse "transition-duration:" which is in seconds or milliseconds
-			matches = ruleMatches[1].match(/transition-duration\s*:\s*(\d*\.?\d*)(ms|s)\s*;/i);
+			matches = ruleMatches[1].match(/transition-duration\s*:\s*(\d*\.?\d*)(ms|s)\s*(?:;|$)/i);
 			if(matches){
 				rule.transitionDuration = (matches[2] == 's' ? parseFloat(matches[1])*1000 : parseFloat(matches[1]));
 			}
 			
 			//Parse "transition-delay:" 
-			matches = ruleMatches[1].match(/transition-delay\s*:\s*(\d*\.?\d*)(ms|s)\s*;/i);
+			matches = ruleMatches[1].match(/transition-delay\s*:\s*(\d*\.?\d*)(ms|s)\s*(?:;|$)/i);
 			if(matches){
 				rule.transitionDelay = (matches[2] == 's' ? parseFloat(matches[1])*1000 : parseFloat(matches[1]));
 			}
 			
 			//Parse "transition-timing-function:" (ease | linear | ease-in | ease-out | ease-in-out | cubic-bezier(<number>, <number>, <number>, <number>))
-			var matches = ruleMatches[1].match(/transition-timing-function\s*:\s*(.+?)\s*;/i);
+			var matches = ruleMatches[1].match(/transition-timing-function\s*:\s*(.+?)\s*(?:;|$)/i);
 			if(matches){
 				throw Error("'transition-timing-function:' is not currently supported");
 			}
@@ -146,7 +148,6 @@ $(document.styleSheets).each(function(){
 			//cssTransitions.baseRuleSelectors[this.selectorText] = ruleIndex;
 			cssTransitions.baseRules.push({
 				selector:this.selectorText,
-				//elementCache:null,
 				index:ruleIndex
 			});
 			rule.isBaseRule = true;
@@ -255,34 +256,14 @@ cssTransitions.applyRule = function(el, ruleIndex){
 	
 	//If this rule is not the base rule, then we need to animate? As in :target. Can this be done to animate the appearance of new elements?
 	var rule = cssTransitions.rules[ruleIndex];
+	var baseRule = cssTransitions.rules[baseRuleIndex]
 	
 	xblConsole.info(rule.selectorText)
-	
-	//xblConsole.info(cssTransitions.rules[ruleIndex].transitionProperty)
-	
-	//Make sure that the transition property and duration are stored for this element, because it
-	//  may have been dynamically generated
-	//if(cssTransitions.rules[ruleIndex].transitionProperty.length)
-	//	$el.data('transitionProperty', cssTransitions.rules[ruleIndex].transitionProperty);
-	//if(cssTransitions.rules[ruleIndex].transitionDuration)
-	//	$el.data('transitionDuration', cssTransitions.rules[ruleIndex].transitionDuration);
-		
-		//@todo: We need to get the transition property of this rule, not of the initial rule so that we can TURN ON animateions
-	
-	//For each of the transition properties, set the style to the current property so that subsequent rules don't override immediately
-	//var transitionProperties = $el.data('transitionProperty');
-	//if(!transitionProperties)
-	//	return;
-	//var transitionDuration = $el.data('transitionDuration');
-	//if(!transitionDuration || transitionProperties[0] == 'none')
-	//	transitionDuration = 0;
+
 	var transitionStyle = {};
-	
-	//var currentStyle = {};
-	//var previousStyle = $el.data('transitionPreviousStyle') || {};
-	//xblConsole.info(cssTransitions.rules[ruleIndex]);
-	
-	if(rule.transitionProperty[0] == 'all' || rule.transitionProperty[0] == 'none'){
+
+	//Transition all properties
+	if(rule.transitionProperty[0] == 'all'){
 		for(var name in cssTransitions.rules[ruleIndex].style){
 			//Initialize the style state
 			if(!el.style[name])
@@ -293,55 +274,37 @@ cssTransitions.applyRule = function(el, ruleIndex){
 	//Only transition the properties that were explicitly provided
 	else {
 		jQuery(rule.transitionProperty).each(function(){
-			//currentStyle[this] = $el.css(this);
-			if(!el.style[this]){
-				//$el.css(this, currentStyle[this]);
+			if(!el.style[this])
 				$el.css(this, $el.css(this));
-			}
-			if(cssTransitions.rules[ruleIndex].style[this]){
-				//xblConsole.info(this, currentStyle[this])
+			if(cssTransitions.rules[ruleIndex].style[this])
 				transitionStyle[this] = cssTransitions.rules[ruleIndex].style[this];
-			}
-			//else if(previousStyle[this]){
-			//	transitionStyle[this] = previousStyle[this];
-			//}
-			
-			//xblConsole.warn(cssTransitions.rules[ruleIndex].style)
-			
 		});
 		
 	}
 	
-	//xblConsole.info(transitionStyle)
-	//xblConsole.warn(transitionProperties)
 	
-	//@todo: We need to implement transitionDelay!!!
-	$el.stop().animate(transitionStyle, rule.transitionDuration);
+	var animate = function(){
+		$el.stop().animate(transitionStyle, baseRule.transitionDuration);
+	};
 	
-	//for(var name in currentStyle){
-	//	previousStyle[name] = currentStyle[name];
-	//}
-	//$el.data('transitionPreviousStyle', previousStyle);
+	//Start animation after delay (and clear any pending delayed transition)
+	if(baseRule.transitionDelay){
+		//window.clearTimeout($el.data('transitionDelayTimer'));
+		//$el.data('transitionDelayTimer', window.setTimeout(animate, baseRule.transitionDelay));
+		window.setTimeout(animate, baseRule.transitionDelay);
+	}
+	//Execute the animation immediately
+	else {
+		animate();
+	}
 	
 	
-	//#### We really need to find out when a binding is REMOVED
+	
+	
+	//#### We really should find out when a binding is REMOVED
 	//document.defaultView.getComputedStyle($('#foo')[0], null).MozBinding
 	//We does this only return 1? It should return a list of bindings that are applied!
 	//We need to get all of the bindings that are applied in the cascade
-	
-	//xblConsole.info(cssTransitions.rules[ruleIndex].selectorText)
-	
-	//xblConsole.info(cssTransitions.rules[ruleIndex].selectorText)
-	//console.info($el.data('transitionProperty'));
-	//console.info($el.data('transitionDuration'));
-	
-	
-	//Note: This doesn't work with :not(:target)
-	//var selectorWithoutPseudoClasses = cssTransitions.rules[ruleIndex].selectorText.replace();
-	
-	//if(cssTransitions.rules[ruleIndex].selectorText.indexOf(':target') == -1){
-	//	var selectorWithoutTarget = cssTransitions.rules[ruleIndex].selectorText.replace(/:target/, '');
-	//}
 };
 
 //Create the URL to the bindings document
