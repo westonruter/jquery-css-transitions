@@ -8,7 +8,7 @@ echo '<?'.'xml version="1.0"?'.'>';?>
 		<implementation>
 			<constructor>
 			<![CDATA[
-			cssTransitions.applyRule(<?php echo $i ?>, this);
+			cssTransitions.applyRule(this, <?php echo $i ?>);
 			]]>
 			</constructor>
 			<?php if(false): ?>
