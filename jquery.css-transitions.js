@@ -21,14 +21,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
 @todo We need to not add a behavior to EVERY rule, just those which provide the properties; if every relevant rule included transition-property:inherit then we could sniff that
-@todo Implement transition-property:all? This would require the use of SWAP?
-@todo Implement transition-delay and transition-timing-function
+@todo Implement transition-timing-function
 @todo We need to support the shorthand notation for transitions
 @todo Impement transition events?
  */
-
-
-
 
 jQuery(function($){
 	
@@ -45,10 +41,9 @@ var cssTransitions = window.cssTransitions = {
 	bindingURL:'bindings.php'
 };
 
-var head = document.getElementsByTagName('head')[0];
 var bindingAppliers = [];
-var ruleIndex = 0;
 
+var ruleIndex = 0;
 $(document.styleSheets).each(function(){
 	//Only do transitions for screen media
 	for(var i = 0; i < this.media.length; i++){
@@ -144,8 +139,6 @@ $(document.styleSheets).each(function(){
 		
 		//This rule is the transition base state if transition-property is not "none" and if transition-delay and transition-duration are not zero
 		if(rule.transitionProperty[0] != 'none' && (rule.transitionDelay || rule.transitionDuration)){
-			//cssTransitions.baseRuleIndicies.push(ruleIndex);
-			//cssTransitions.baseRuleSelectors[this.selectorText] = ruleIndex;
 			cssTransitions.baseRules.push({
 				selector:this.selectorText,
 				index:ruleIndex
@@ -205,9 +198,11 @@ $(document.styleSheets).each(function(){
 });
 
 
+//Function which is called by the behaviors whenever one is constructed
 cssTransitions.applyRule = function(el, ruleIndex){
 	//The following code needs to be placed into a global jQuery.cssTransitions.activate(ruleIndex, this)
 	//To keep all code possible in the JS file; we also need to put cssTransitions.rules into jQuery.cssTransitions.rules
+	
 	
 	var $el = jQuery(el);
 	var baseRuleIndex;
@@ -258,7 +253,8 @@ cssTransitions.applyRule = function(el, ruleIndex){
 	var rule = cssTransitions.rules[ruleIndex];
 	var baseRule = cssTransitions.rules[baseRuleIndex]
 	
-	xblConsole.info(rule.selectorText)
+	if(window.xblConsole)
+		xblConsole.info(rule.selectorText)
 
 	var transitionStyle = {};
 
@@ -282,7 +278,6 @@ cssTransitions.applyRule = function(el, ruleIndex){
 		
 	}
 	
-	
 	var animate = function(){
 		$el.stop().animate(transitionStyle, baseRule.transitionDuration);
 	};
@@ -297,9 +292,6 @@ cssTransitions.applyRule = function(el, ruleIndex){
 	else {
 		animate();
 	}
-	
-	
-	
 	
 	//#### We really should find out when a binding is REMOVED
 	//document.defaultView.getComputedStyle($('#foo')[0], null).MozBinding
@@ -336,13 +328,6 @@ function regExpEscape(text) { //from Simon Willison <http://simonwillison.net/20
   }
   return text.replace(arguments.callee.sRE, '\\$1');
 }
-
-
-
-
-
-
-
 
 
 }); //end jQuery.ready
