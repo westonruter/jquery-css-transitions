@@ -26,7 +26,8 @@
 @todo Impement transition events?
  */
 
-var cssTransitionRules = [];
+
+
 
 jQuery(function($){
 	
@@ -35,33 +36,18 @@ var test = $('<div style="-moz-transition-duration:1s; -webkit-transition-durati
 if(test[0].style.transitionDuration || test[0].style.mozTransitionDuration || test[0].style.webkitTransitionDuration)
 	return;
 
-//var xml = document.createElement('xml');
-//var xblns = 'http://www.mozilla.org/xbl';
-//var bindings = document.createElementNS(xblns, 'bindings');
-//xml.appendChild(bindings);
-//document.getElementsByTagName('head')[0].appendChild(xml);
+//Set up global bookkeeping object
+var cssTransitions = window.cssTransitions = {
+	rules:[],
+	initialRules:[],
+	bindingURL:'bindings.php'
+};
 
 
-function cssNameToJsNameCallback(c){
-	return c[1].toUpperCase();
-}
-function RegExpEscape(text) { //from Simon Willison <http://simonwillison.net/2006/Jan/20/escape/>
-  if (!arguments.callee.sRE) {
-    var specials = [
-      '/', '.', '*', '+', '?', '|',
-      '(', ')', '[', ']', '{', '}', '\\'
-    ];
-    arguments.callee.sRE = new RegExp(
-      '(\\' + specials.join('|\\') + ')', 'g'
-    );
-  }
-  return text.replace(arguments.callee.sRE, '\\$1');
-}
 
 
 var head = document.getElementsByTagName('head')[0];
 
-var bindingURL = "bindings.php?";
 var bindingAppliers = [];
 var bindingIndex = 0;
 
@@ -178,13 +164,13 @@ $(document.styleSheets).each(function(){
 		}
 
 		//console.warn(rule.style)
-		cssTransitionRules[bindingIndex] = rule;
+		cssTransitions.rules[bindingIndex] = rule;
 		
 		//Create a function for adding a binding to this rule; this function is called once the binding XML file is successfully loaded in order to avoid flash of unstyled content
 		bindingAppliers.push(
 			(function(i){
 				return function(){
-					style.MozBinding = "url('" + bindingURL + "#rule" + (i+1) + "')";
+					style.MozBinding = "url('" + cssTransitions.bindingURL + "#rule" + i + "')";
 				}
 			})(bindingIndex)
 		);
@@ -194,323 +180,140 @@ $(document.styleSheets).each(function(){
 	
 });
 
+
+cssTransitions.applyRule = function(i, el){
+	//The following code needs to be placed into a global jQuery.cssTransitions.activate(i, this)
+	//To keep all code possible in the JS file; we also need to put cssTransitions.rules into jQuery.cssTransitions.rules
+	
+	var $el = jQuery(el);
+	var isInitialized = !!$el.data('transitionInitialized');
+
+	//Here we need to see if cssTransitions.rules[i].selectorText is actually 
+	if(isInitialized){
+		
+	}
+	
+
+	xblConsole.info(cssTransitions.rules[i].selectorText)
+	//xblConsole.info(cssTransitions.rules[i].transitionProperty)
+	
+	//Make sure that the transition property and duration are stored for this element, because it
+	//  may have been dynamically generated
+	if(cssTransitions.rules[i].transitionProperty.length)
+		$el.data('transitionProperty', cssTransitions.rules[i].transitionProperty);
+	if(cssTransitions.rules[i].transitionDuration)
+		$el.data('transitionDuration', cssTransitions.rules[i].transitionDuration);
+		
+		//@todo: We need to get the transition property of this rule, not of the initial rule so that we can TURN ON animateions
+	
+	//For each of the transition properties, set the style to the current property so that subsequent rules don't override immediately
+	var transitionProperties = $el.data('transitionProperty');
+	if(!transitionProperties)
+		return;
+	var transitionDuration = $el.data('transitionDuration');
+	if(!transitionDuration || transitionProperties[0] == 'none')
+		transitionDuration = 0;
+	var transitionStyle = {};
+	//var currentStyle = {};
+	//var previousStyle = $el.data('transitionPreviousStyle') || {};
+	//xblConsole.info(cssTransitions.rules[i]);
+	
+	if(transitionProperties[0] == 'all' || transitionProperties[0] == 'none'){
+		for(var name in cssTransitions.rules[i].style){
+			if(!el.style[name])
+				$el.css(name, $el.css(name));
+			transitionStyle[name] = cssTransitions.rules[i].style[name];
+		}
+	}
+	//Only transition the properties that were explicitly provided
+	else {
+		jQuery(transitionProperties).each(function(){
+			//currentStyle[this] = $el.css(this);
+			if(!el.style[this]){
+				//$el.css(this, currentStyle[this]);
+				$el.css(this, $el.css(this));
+			}
+			if(cssTransitions.rules[i].style[this]){
+				//xblConsole.info(this, currentStyle[this])
+				transitionStyle[this] = cssTransitions.rules[i].style[this];
+			}
+			//else if(previousStyle[this]){
+			//	transitionStyle[this] = previousStyle[this];
+			//}
+			
+			//xblConsole.warn(cssTransitions.rules[i].style)
+			
+		});
+		
+	}
+	
+	//xblConsole.info(transitionStyle)
+	//xblConsole.warn(transitionProperties)
+	
+	$el.stop().animate(transitionStyle, transitionDuration);
+	
+	//for(var name in currentStyle){
+	//	previousStyle[name] = currentStyle[name];
+	//}
+	//$el.data('transitionPreviousStyle', previousStyle);
+	
+	
+	//#### We really need to find out when a binding is REMOVED
+	//document.defaultView.getComputedStyle($('#foo')[0], null).MozBinding
+	//We does this only return 1? It should return a list of bindings that are applied!
+	//We need to get all of the bindings that are applied in the cascade
+	
+	//xblConsole.info(cssTransitions.rules[i].selectorText)
+	
+	//xblConsole.info(cssTransitions.rules[i].selectorText)
+	//console.info($el.data('transitionProperty'));
+	//console.info($el.data('transitionDuration'));
+	
+	
+	//Note: This doesn't work with :not(:target)
+	//var selectorWithoutPseudoClasses = cssTransitions.rules[i].selectorText.replace();
+	
+	//if(cssTransitions.rules[i].selectorText.indexOf(':target') == -1){
+	//	var selectorWithoutTarget = cssTransitions.rules[i].selectorText.replace(/:target/, '');
+	//}
+};
+
 //Create the URL to the bindings document
-bindingURL += "count=" + bindingIndex + "&time=" + (new Date()).valueOf();
+cssTransitions.bindingURL += "?count=" + bindingIndex + "&time=" + (new Date()).valueOf();
 
 //Prefetch the binding document and then apply the bindings once loaded
-$.get(bindingURL, null, function(data, textStatus){
-	//style.MozBinding = "url('" + bindingURL + "#default')";
+$.get(cssTransitions.bindingURL, null, function(data, textStatus){
+	//style.MozBinding = "url('" + cssTransitions.bindingURL + "#default')";
 	$(bindingAppliers).each(function(){
 		this()
 	});
 });
 
 
-//console.info(cssTransitionRules)
-
-//$(bindingAppliers).each(function(){
-//	this()
-//});
 
 
-
-
-
-
-
-
-
-
-
-
-return;
-
-
-//Script needs to be able to find all of the transition-property and transition-duration properties and all
-//   of the elements that they are defined for. We also need to add mouseenter/mouseleave handlers for the
-//   selected elements or the ancestors of the selected elements that have the :hover pseudoclass and then
-//   prevent the *cascaded rules* from being applied immediately, but rather have them transition from the
-//   default state to the state that is defined with the pseudoclass selector.
-//   We can add behaviors (htc and xbl) to both the on and off states and so we can detect when the class is modified
+function cssNameToJsNameCallback(c){
+	return c[1].toUpperCase();
+}
+function RegExpEscape(text) { //from Simon Willison <http://simonwillison.net/2006/Jan/20/escape/>
+  if (!arguments.callee.sRE) {
+    var specials = [
+      '/', '.', '*', '+', '?', '|',
+      '(', ')', '[', ']', '{', '}', '\\'
+    ];
+    arguments.callee.sRE = new RegExp(
+      '(\\' + specials.join('|\\') + ')', 'g'
+    );
+  }
+  return text.replace(arguments.callee.sRE, '\\$1');
+}
 
 
 
-//var bindings = document.createElementNS('http://www.mozilla.org/xbl', 'bindings');
-//var binding = document.createElementNS('http://www.mozilla.org/xbl', 'binding');
-//binding.setAttribute('id', 'xbl-test');
-//bindings.appendChild(binding);
-//
-//var imp = document.createElementNS('http://www.mozilla.org/xbl', 'implementation');
-//binding.appendChild(imp);
-//
-//var constructor = document.createElementNS('http://www.mozilla.org/xbl', 'constructor');
-//constructor.appendChild(document.createTextNode("alert('construct')"));
-//imp.appendChild(constructor);
-//
-//var destructor = document.createElementNS('http://www.mozilla.org/xbl', 'destructor');
-//imp.appendChild(destructor);
-//destructor.appendChild(document.createTextNode("alert('destruct')"));
-//
-//var content = document.createElementNS('http://www.mozilla.org/xbl', 'content');
-//content.appendChild(document.createElementNS('http://www.mozilla.org/xbl', 'children'));
-//binding.appendChild(content);
-//
-//var style = document.createElement('style');
-//style.type = 'text/css';
-//style.appendChild(document.createTextNode(".foobar { -moz-binding:url(#xbl-test) } "));
-//
-//$('img:last').addClass('foobar');
-//
-//
-//try {
-//	document.getElementsByTagName('head')[0].appendChild(bindings);
-//	document.getElementsByTagName('head')[0].appendChild(style);
-//}
-//catch(e){
-//	alert(e)
-//}
 
-var regexpCssParse = /^\s*([^{}]+)\s*{\s*((?:[^{}"]+|"[^"]+")+)\s*}\s*/g;
-$(document.styleSheets).each(function(){
-	//Only do transitions for screen media
-	for(var i = 0; i < this.media.length; i++){
-		var media = this.media.item ? this.media.item(i) : this.media;
-		if(media && media != 'screen' && media != 'all')
-			return;
-	}
-	
-	//We actually have to load the stylesheet in via XHR (inspired by moofx)
-	var el = this[this.ownerNode ? 'ownerNode' : 'owningElement'];
-	var cssText;
-	switch(el.nodeName.toLowerCase()){
-		case 'style':
-			cssText = el.innerHTML;
-			break;
-		case 'link':
-			var xhr = $.ajax({
-				url:el.href,
-				async:false
-			});
-			cssText = xhr.responseText;
-			break;
-		default:
-			return;
-	}
-	
-	//Find each rule that has a transition defined, and then add the transition properties to them to keep
-	//  track in case they are not supported natively
-	//We will need to activate transitions when a :hover (mouseover/mouseout) is done, and when a class is added or removed
-	
-	//Remove all comments and normalize whitespace
-	cssText = cssText.replace(/\/\*(.|\s)*?\*\//g, ' ');
-	cssText = cssText.replace(/\s+/g, ' ');
-	
-	//var t = cssText.match(regexpCssParse);
-	
-	var parserCallback = function(rule, selector, properties){
-		var transitionProperties = [];
-		var transitionDuration = -1;
-		
-		var transitionPropertyMatch = properties.match(/transition-property:\s*([^;]+)\s*(?:;|$)/);
-		var transitionDurationMatch = properties.match(/transition-duration:\s*(\d*\.?\d*)(ms|s)\s*(?:;|$)/);
-		
-		//Parse the properties
-		if(transitionPropertyMatch){
-			//transitionProperties = transitionPropertyMatch[1].split(/\s*,\s*/);
-			//Convert CSS property naming convention to JavaScript camelCase naming convention
-			$(transitionPropertyMatch[1].split(/\s*,\s*/)).each(function(){
-				transitionProperties.push(this.replace(/-([a-z])/g, function(a, b){ return b.toUpperCase(); }));
-			});
-		}
-		if(transitionDurationMatch){
-			if(transitionDurationMatch[2] == 'ms')
-				transitionDuration = parseFloat(transitionDurationMatch[1]);
-			else
-				transitionDuration = parseFloat(transitionDurationMatch[1])*1000;
-			
-			if(isNaN(transitionDuration))
-				transitionDuration = 0;
-		}
-		
-		//Add hover() handler for the 
-		// Immediately upon discovering that a transition has been detected, reset the style so that the intial values are being used, and then
-		// animate to them.
-		
-		$(selector.split(/\s*,\s*/)).each(function(){
-			var subSelector = this;
-			
-			if(subSelector.indexOf(':hover') != -1){
-				var selectorHoverSplit = subSelector.split(/:hover\s*/);
-				
-				//Get all of the hover elements states
-				var hoverStyles = {};
-				$(properties.split(/\s*;\s*/)).each(function(){
-					if(!this)
-						return;
-					var propParts = this.split(/\s*:\s*/);
-					if(propParts[0] && propParts[1]){
-						var propName = propParts[0].toLowerCase().replace(/-([a-z])/g, function(a, b){ return b.toUpperCase(); });
-						if(propName != 'textShadow' && propName != 'zIndex' && propName != 'filter'){
-								hoverStyles[propName] = propParts[1];
-						}
-					}
-				});
-				
-				var hoverableElements = $(selectorHoverSplit[0]);
-				
-				hoverableElements.each(function(){
-					var hoverElements;
-					
-					
-					//If decendents specified, apply on it
-					if(selectorHoverSplit[1]){
-						hoverElements = $(this).find(selectorHoverSplit[1]);
-						if(!hoverElements.length)
-							return;
-					}
-					//Otherwise just select this one
-					else
-						hoverElements = $(this);
-					
-					//Save all of the hover states into each hoverElement
-					var hs = hoverElements.data('hover-styles');
-					if(!hs){
-						hoverElements.data('hover-styles', {});
-						hs = hoverElements.data('hover-styles');
-					}
-					for(var propName in hoverStyles){
-						hs[propName] = hoverStyles[propName];
-					}
-				});
-				
-				
-				//return; //DEBUG
-				
-				//Get all of the elements that will be hovered and add a hover() handler to each of them
-				hoverableElements.hover(
-					/* mouseenter */
-					function(){
-						var els;
-						
-						//If decendents specified, apply on it
-						if(selectorHoverSplit[1])
-							els = $(this).find(selectorHoverSplit[1]);
-						//Otherwise just select this one
-						else
-							els = $(this);
-						
-						//For each of the targetted elements for animation, animate them each
-						$(els).stop().each(function(){
-							var el = $(this);
-							var startStyles = el.data('start-styles');
-							if(!startStyles)
-								return;
-							//console.info("start bgcolor = " + startStyles.backgroundColor);
-							//console.info("end bgcolor = " + this.currentStyle.backgroundColor);
-							
-							//Get the end-styles if they haven't been found yet
-							var endStyles = el.data('hover-styles');
-							for(var propName in endStyles){
-								if(typeof startStyles[propName] != 'undefined'){
-									el.css(propName, startStyles[propName]);
-								}
-							}
-							
-							//console.info(endStyles)
-							//if(false && !endStyles){
-							//	endStyles = {};
-							//	
-							//	//if(jQuery.browser.msie){
-							//	//	
-							//	//	
-							//	//	
-							//	//}
-							//	//else {
-							//		//This does not work in IE, so we need to look up the explicit values defined in the stylesheet
-							//		for(var propName in startStyles){
-							//			endStyles[propName] = el.css(propName);
-							//			el.css(propName, startStyles[propName]);
-							//		}
-							//	//}
-							//	el.data('end-styles', endStyles);
-							//}
-							//console.info([startStyles['background-color'], endStyles['background-color']])
-							//console.warn(el.data('transition-duration'))
-							//console.info(endStyles)
-							//console.info(endStyles.backgroundColor);
-							
-							//We need to verify all of the propNames
-							el.animate(endStyles, el.data('transition-duration'));
-							//el.animate({'background-color':'#FFFFFF'}, el.data('transition-duration'));
-							//el.css(endStyles);
-							
-						});
-					},
-					
-					/* mouseleave */
-					function(){
-						var els;
-						
-						//If decendents specified, apply on it
-						if(selectorHoverSplit[1])
-							els = $(this).find(selectorHoverSplit[1]);
-						//Otherwise just select this one
-						else
-							els = $(this);
-						
-						$(els).stop().each(function(){
-							var el = $(this);
-							var startStyles = el.data('start-styles');
-							if(!startStyles)
-								return;
-							el.animate(startStyles, el.data('transition-duration'));
-						});
-					}
-				);
-			}
-		});
-		
-		
-		//If there was a match, then store the transition properties in the DOM elements
-		if(transitionProperties.length || transitionDuration != -1){
-			try {
-				$(selector).each(function(){
-					var startStyles = {};
-					if(transitionProperties.length){
-						var el = this;
-						$(el).data("transition-property", transitionProperties);
-						
-						//Save the initial styles which will be transitioned into
-						$(transitionProperties).each(function(){
-							var value = $(el).css(this);
-							if(value){
-								startStyles[this] = value;
-							}
-							
-						});
-						$(this).data("start-styles", startStyles);
-					}
-					if(transitionDuration != -1)
-						$(this).data("transition-duration", transitionDuration);
-				});
-			}
-			catch(e){
-				if(window.console && window.console.warn){
-					console.warn(rule);
-					console.warn(e);
-				}
-			}
-			
-		}
-		return '';
-	};
-	
-	var lastCssText;
-	while(cssText && cssText != lastCssText){
-		lastCssText = cssText;
-		cssText = cssText.replace(regexpCssParse, parserCallback)
-	}
-	
-});
+
+
+
+
 
 }); //end jQuery.ready
