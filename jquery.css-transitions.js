@@ -27,17 +27,84 @@
 @todo We could have an option to restrict all transitions to one CSS file (more HTTP load, but less computation load)
  */
 
-if(window.console && console.profile){
+if(false && window.console && console.profile){
 	console.profile("CSS Transitions");
 	window.onload = function(){console.profileEnd("CSS Transitions");}
 }
 
-jQuery(function($){
-	
+(function(){
+var $ = jQuery;
+
 //Return of if CSS Transitions are supported natively
-var test = $('<div style="-moz-transition-duration:1s; -webkit-transition-duration:1s; transition-duration:1s; "></div>');
-if(test[0].style.transitionDuration || test[0].style.mozTransitionDuration || test[0].style.webkitTransitionDuration)
+var test = $('<div style="-moz-transition-duration:1s; -webkit-transition-duration:1s; transition-duration:1s; -moz-binding:none; binding:none;"></div>')[0];
+if(test.style.transitionDuration || test.style.mozTransitionDuration || test.style.webkitTransitionDuration)
 	return;
+
+//Get the CSS property name that is used by the browser
+var bindingPropertyName;
+var isXBL = false, isHTC = false;
+if(test.style.MozBinding){ //for Mozilla
+	bindingPropertyName = 'MozBinding';
+	isXBL = true;
+}
+else if(test.style.binding){ //for MSIE
+	bindingPropertyName = 'behavior';
+	isHTC = true;
+}
+else //Quit if bindings aren't supported
+	return;
+
+var animatableProperties = [
+	'backgroundColor',
+	'backgroundImage',
+	'backgroundPosition',
+	'borderBottomColor',
+	'borderBottomWidth',
+	'borderColor',
+	'borderLeftColor',
+	'borderLeftWidth',
+	'borderRightColor',
+	'borderRightWidth',
+	'borderSpacing',
+	'borderTopColor',
+	'borderTopWidth',
+	'borderWidth',
+	'bottom',
+	'color',
+	'crop',
+	'fontSize',
+	'fontWeight',
+	'height',
+	'left',
+	'letterSpacing',
+	'lineHeight',
+	'marginBottom',
+	'marginLeft',
+	'marginRight',
+	'marginTop',
+	'maxHeight',
+	'maxWidth',
+	'minHeight',
+	'minWidth',
+	'opacity',
+	'outlineColor',
+	'outlineOffset',
+	'outlineWidth',
+	'paddingBottom',
+	'paddingLeft',
+	'paddingRight',
+	'paddingTop',
+	'right',
+	'textIndent',
+	'textShadow',
+	'top',
+	'verticalAlign',
+	'visibility',
+	'width',
+	'wordspacing',
+	'zIndex',
+	'zoom'
+];
 
 //Set up global bookkeeping object
 var cssTransitions = window.cssTransitions = {
@@ -46,6 +113,9 @@ var cssTransitions = window.cssTransitions = {
 	baseRuleLookup:{}, //keys are rules
 	bindingURL:'bindings.php'
 };
+
+
+$(function(){
 
 var bindingAppliers = [];
 
@@ -63,6 +133,7 @@ $(document.styleSheets).each(function(){
 	var sheetCssText;
 	switch(el.nodeName.toLowerCase()){
 		case 'style':
+			return; //does not work with inline styles because IE doesn't allow you to get the text content of a STYLE element
 			sheetCssText = el.innerHTML;
 			break;
 		case 'link':
@@ -93,9 +164,10 @@ $(document.styleSheets).each(function(){
 	//$(rules).each(function(){
 	for(var i = 0; i < rules.length; i++){
 		var that = rules[i];
-		
 		var ruleInfo = {
-			selectorText:that.selectorText,
+			selectorText:that.selectorText/*.replace(/(?:^| )([A-Z][A-Z]+)\b/g, function(m){
+				return m.toLowerCase()
+			})*/,
 			style:{},
 			transitionProperty:['all'],
 			transitionDuration:0, //ms
@@ -104,13 +176,27 @@ $(document.styleSheets).each(function(){
 			isBaseRule:false
 		};
 		
+		//@todo: Huge problem: that.selectorText may be different then the form used in the stylesheet (where the className appears or where the )
+		//If in the stylesheet there is the selector: .foo#bar.on.off.freak
+		//Then in Firefox it is stored as: #bar.foo.on.off.freak
+		//    But in MSIE it is stored as: .freak.off.on.foo#bar
+		//  One way to resolve this is to match by length; or to have a kind of signature which is composed of all of the characters used
+		if(jQuery.browser.msie){
+			ruleInfo.selectorText = ruleInfo.selectorText.replace(/((?:\.[a-z\-_]+?)+)(#\w+\S+)/ig, function(a,b,c){
+				var classes = b.substr(1).split(/\./).reverse();
+				return c + '.' + classes.join('.');
+			});
+		}
+		
 		//Parse out the transition styles that exist in this rule
-		var regexpParseStyles = '(?:^|})\\s*' + regExpEscape(that.selectorText) + '\\s*{((?:[^{}"]+|"[^"]+")+)}';
-		var ruleMatches = sheetCssText.match(new RegExp(regexpParseStyles));
+		var regexpParseStyles = '(?:^|})\\s*' + regExpEscape(ruleInfo.selectorText) + '\\s*{((?:[^{}"]+|"[^"]+")+)}';
+		var regExp = new RegExp(regexpParseStyles, 'i');
+		var ruleMatches = sheetCssText.match(regExp);
 		if(ruleMatches){
 			//If the /*@ transition-rule @*/ directive doesn't appear in the CSS, then skip
-			if(ruleMatches[1].indexOf('transition-rule') == -1)
+			if(ruleMatches[1].indexOf('transition-rule') == -1){
 				continue; //return;
+			}
 			
 			var matches;
 			
@@ -123,7 +209,8 @@ $(document.styleSheets).each(function(){
 			//Parse comma-separated "transition-property:" 
 			matches = ruleMatches[1].match(/transition-property\s*:\s*(.+?)\s*(?:;|$)/i);
 			if(matches){
-				ruleInfo.transitionProperty.length = 0;
+				//ruleInfo.transitionProperty.length = 0;
+				ruleInfo.transitionProperty = [];
 				$(matches[1].split(/\s*,\s*/)).map(function(){
 					ruleInfo.transitionProperty.push(this.replace(/-([a-z])/, cssNameToJsNameCallback));
 				});
@@ -181,20 +268,27 @@ $(document.styleSheets).each(function(){
 		//			console.error("Unable to use selector: " + that.selectorText);
 		//	}
 		//}
-		
 
 		//Store all of the styles in this rule so that they can be accessed by the bindings later
-		//var style = this.style;
-		for(var j = 0; that.style[j]; j++){
-			//Convert the name from CSS format to JavaScript format and change make any additional name changes
-			var name = that.style[j].replace(/-([a-z])/g, cssNameToJsNameCallback);
-			if(name == 'paddingLeftValue' || name == 'paddingRightValue')
-				name = name.replace(/Value$/, '');
+		for(var j = 0; j < animatableProperties.length; j++){
+			var name = animatableProperties[j];
 			
 			//Save the style associated with that name
 			if(that.style[name])
 				ruleInfo.style[name] = that.style[name];
 		}
+		
+		//(The following doesn't work in IE) Store all of the styles in this rule so that they can be accessed by the bindings later
+		//for(var j = 0; that.style[j]; j++){
+		//	//Convert the name from CSS format to JavaScript format and change make any additional name changes
+		//	var name = that.style[j].replace(/-([a-z])/g, cssNameToJsNameCallback);
+		//	if(name == 'paddingLeftValue' || name == 'paddingRightValue')
+		//		name = name.replace(/Value$/, '');
+		//	
+		//	//Save the style associated with that name
+		//	if(that.style[name])
+		//		ruleInfo.style[name] = that.style[name];
+		//}
 
 		//Store this rule and associate it with this ruleIndex (so that the binding can call up the rule that it was part of)
 		cssTransitions.rules[ruleIndex] = ruleInfo;
@@ -202,13 +296,37 @@ $(document.styleSheets).each(function(){
 		//Create a function for adding a binding to this rule; this function is called once the binding XML file is successfully loaded in order to avoid flash of unstyled content
 		//var that = this;
 		
-		bindingAppliers.push(
-			(function(rule, i){
-				return function(){
-					rule.style.MozBinding = "url('" + cssTransitions.bindingURL + "#rule" + i + "')";
-				}
-			})(that, ruleIndex)
-		);
+		if(isHTC){
+			//that.style.binding = "url('" + cssTransitions.bindingURL + "?rule=" + i + "&foo=test.htc')";
+			//console.info(that)
+			//console.info(that.style)
+			//that.style.behavior = 'url(test.htc?rule=' + i + ')';
+			
+			//console.info(cssTransitions.bindingURL + "?rule=" + i)
+			that.style.behavior = 'url("' + cssTransitions.bindingURL + "?rule=" + ruleIndex + '")'; // + "&time=" + (new Date()).valueOf()
+			
+		}
+		else {
+
+			bindingAppliers.push(
+				(function(rule, i){
+					//if(isXBL){
+						return function(){
+							//rule.style.MozBinding = "url('" + cssTransitions.bindingURL + "#rule" + i + "')";
+							rule.style.MozBinding = "url('" + cssTransitions.bindingURL + "#rule" + i + "')";
+						}
+					//}
+					//else {
+					//	return function(){
+					//		//rule.style.MozBinding = "url('" + cssTransitions.bindingURL + "#rule" + i + "')";
+					//		console.warn("url('" + cssTransitions.bindingURL + "&rule=" + i + "')");
+					//		rule.style.binding = "url('" + cssTransitions.bindingURL + "&rule=" + i + "')";
+					//	}
+					//}
+				})(that, ruleIndex)
+			);
+		}
+		
 		
 		ruleIndex++;
 	//});
@@ -270,29 +388,33 @@ cssTransitions.applyRule = function(el, ruleIndex){
 	
 	//If this rule is not the base rule, then we need to animate? As in :target. Can this be done to animate the appearance of new elements?
 	var rule = cssTransitions.rules[ruleIndex];
-	var baseRule = cssTransitions.rules[baseRuleIndex]
+	var baseRule = cssTransitions.rules[baseRuleIndex];
 	
-	if(window.xblConsole)
-		xblConsole.info(rule.selectorText)
-
+	if(window.console){ //DEBUG
+		console.info(rule.selectorText)
+		//console.info(baseRule);
+	}
+	
 	var transitionStyle = {};
 
 	//Transition all properties
-	if(rule.transitionProperty[0] == 'all'){
-		for(var name in cssTransitions.rules[ruleIndex].style){
+	if(baseRule.transitionProperty[0] == 'all'){
+		for(var name in rule.style){
 			//Initialize the style state
 			if(!el.style[name])
 				$el.css(name, $el.css(name));
-			transitionStyle[name] = cssTransitions.rules[ruleIndex].style[name];
+			transitionStyle[name] = rule.style[name];
 		}
 	}
 	//Only transition the properties that were explicitly provided
 	else {
-		jQuery(rule.transitionProperty).each(function(){
-			if(!el.style[this])
-				$el.css(this, $el.css(this));
-			if(cssTransitions.rules[ruleIndex].style[this])
-				transitionStyle[this] = cssTransitions.rules[ruleIndex].style[this];
+		jQuery(baseRule.transitionProperty).each(function(){
+			var name = this;
+			
+			if(!el.style[name])
+				$el.css(name, $el.css(name));
+			if(cssTransitions.rules[ruleIndex].style[name])
+				transitionStyle[name] = rule.style[name];
 		});
 		
 	}
@@ -320,20 +442,32 @@ cssTransitions.applyRule = function(el, ruleIndex){
 
 //Create the URL to the bindings document
 cssTransitions.bindingURL += "?count=" + ruleIndex + "&time=" + (new Date()).valueOf();
+//cssTransitions.bindingURL = window.location.href.replace(/#.*/,'') + cssTransitions.bindingURL;
+
 
 //Prefetch the binding document and then apply the bindings once loaded
-$.get(cssTransitions.bindingURL, null, function(data, textStatus){
-	//style.MozBinding = "url('" + cssTransitions.bindingURL + "#default')";
-	$(bindingAppliers).each(function(){
-		this()
+if(isXBL){
+	$.get(cssTransitions.bindingURL, null, function(data, textStatus){
+		$(bindingAppliers).each(function(){
+			this()
+		});
 	});
-});
+}
+//else {
+//	$(bindingAppliers).each(function(){
+//		this()
+//	});
+//}
 
 
 
-
-function cssNameToJsNameCallback(c){
-	return c[1].toUpperCase();
+function cssNameToJsNameCallback(c, b){
+	return b.toUpperCase();
+	
+	if(c[1])
+		return c[1].toUpperCase();
+	else
+		return c.toUpperCase();
 }
 function regExpEscape(text) { //from Simon Willison <http://simonwillison.net/2006/Jan/20/escape/>
   if (!arguments.callee.sRE) {
@@ -350,3 +484,5 @@ function regExpEscape(text) { //from Simon Willison <http://simonwillison.net/20
 
 
 }); //end jQuery.ready
+
+})(); //end scope

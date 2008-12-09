@@ -7,128 +7,7 @@
     var xblConsole = window.console;
     </script>
     
-    <style type="text/css">
-    
-    address {
-        
-    }
-    address:hover {
-        
-    }
-    hr {
-        
-    }
-    
-    body > #bar {
-        /*@ transition-rule @*/
-        
-        background-color:#EEE;
-        color:black;
-        padding-top:5px;
-        padding-bottom:5px;
-        padding-left:5px;
-        padding-right:5px;
-        width:50%;
-        
-        -webkit-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
-        -webkit-transition-duration:0.5s;
-        /*-webkit-transition-delay:1s;*/
-        -moz-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
-        -moz-transition-duration:0.5s;
-        transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
-        transition-duration:0.5s;
-        /*transition-delay:1s;*/
-        
-    }
-    
-    #bar:target {
-        /*@ transition-rule @*/
-        padding:10px;
-        background-color:blue;
-        color:white;
-        width:80%;
-    }
-    #bar.on {
-        /*@ transition-rule @*/
-        padding:40px 15px;
-        background-color:pink;
-        color:red;
-        width:70%;
-    }
-    #bar:hover {
-        /*@ transition-rule @*/
-        padding:25px;
-        background-color:cyan;
-        color:blue;
-        width:80%;
-    }
-    #bar:active {
-        /*@ transition-rule @*/
-        padding:35px;
-        background-color:yellow;
-        color:green;
-        width:40%;
-    }
-    
-    body > #foo {
-        background-color:#EEE;
-        color:black;
-        padding-top:5px;
-        padding-bottom:5px;
-        padding-left:5px;
-        padding-right:5px;
-        width:50%;
-        
-        -webkit-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
-        -webkit-transition-duration:0.5s;
-        -moz-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
-        -moz-transition-duration:0.5s;
-        transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
-        transition-duration:0.5s;
-        
-        /*@ transition-rule @*/
-    }
-    
-    #foo:target {
-        /*width:70%;
-        background-color:orange;
-        color:green;
-        padding:15px;*/
-        padding:20px 20px 20px 20px;
-        /*@ transition-rule @*/
-    }
-    /* This does not work; only one binding is set at a time */
-    /*
-    body #foo.on { 
-        background-color:blue;
-    }
-    */
-    #foo.on {
-        /*width:80%;
-        background-color:cyan;
-        color:purple;
-        padding:30px;*/
-        color:red;
-        /*@ transition-rule @*/
-    }
-    #foo:hover {
-        /*width:60%;
-        background-color:yellow;
-        color:red;
-        padding:10px;*/
-        background-color:lime;
-        /*@ transition-rule @*/
-    }
-    #foo:active {
-        /*width:70%;
-        background-color:lime;
-        color:blue;
-        padding:20px;*/
-        width:80%;
-        /*@ transition-rule @*/
-    }
-    
-    </style>
+    <link rel="stylesheet" href="style.css" type="text/css" media="screen" />
 </head>
 <body>
 	<h1>CSS Transitions Implemented by jQuery Animations</h1>
@@ -147,9 +26,11 @@
         Click for padding 30px; bgcolor yellow; text green; width:40
     </p>
     
-    <ol>
-        <li>Add more items to me!</li>  
-    </ol>
+    
+    
+    <!--<ol>
+        <li style='behavior:url("test.htc#rule1")'>Add more items to me!</li>  
+    </ol>-->
 
 
     <hr>
@@ -178,5 +59,18 @@
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.js"></script>
 	<script type="text/javascript" src="jquery.color.js"></script>
 	<script type="text/javascript" src="jquery.css-transitions.js"></script>
+    <script type="text/javascript">
+    var $ = jQuery;
+    
+    $('#bar').hover(
+        function(){ $(this).addClass('hover'); },
+        function(){ $(this).removeClass('hover'); }
+    );
+    $('#bar').mousedown(function(){
+        $(this).addClass('active');
+    }).mouseup(function(){
+        $(this).removeClass('active');
+    });
+    </script>
 </body>
 </html>

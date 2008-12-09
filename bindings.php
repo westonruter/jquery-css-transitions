@@ -1,7 +1,12 @@
 <?php
-header('content-type:application/xml');
+
 header('expires: ' . str_replace('+0000', 'GMT', gmdate('r', time() + 3600*24))); //one day later
-echo '<?'.'xml version="1.0"?'.'>';?>
+
+//XBL
+if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') === false):
+header('content-type:application/xml');
+echo '<?'.'xml version="1.0"?'.'>';
+?>
 <bindings xmlns="http://www.mozilla.org/xbl" xmlns:html="http://www.w3.org/1999/xhtml">
 <?php for($i = 0; $i < @$_GET['count']; $i++): ?>
 	<binding id="rule<?php echo $i; ?>">
@@ -30,3 +35,15 @@ echo '<?'.'xml version="1.0"?'.'>';?>
 	</binding>
 <?php endfor; ?>
 </bindings>
+<?php
+//HTC
+else:
+header('content-type:text/x-component');
+?>
+<PUBLIC:COMPONENT NAME="rule<?php echo (int)($_GET['rule']); ?>">
+	<SCRIPT LANGUAGE="JScript">
+		console.info(<?php echo (int)($_GET['rule']) ?>);
+		window.cssTransitions.applyRule(element, <?php echo (int)($_GET['rule']) ?>);
+	</SCRIPT>
+</PUBLIC:COMPONENT>
+<?php endif ?>

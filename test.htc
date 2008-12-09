@@ -1,0 +1,5 @@
+<PUBLIC:COMPONENT>
+	<SCRIPT LANGUAGE="JScript">
+		alert(element)
+	</SCRIPT>
+</PUBLIC:COMPONENT>
