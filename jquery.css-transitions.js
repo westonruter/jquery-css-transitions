@@ -51,7 +51,7 @@ else if(test.style.binding){ //for MSIE
 	bindingPropertyName = 'behavior';
 	isHTC = true;
 }
-else //Quit if bindings aren't supported
+else //Quit since bindings aren't supported
 	return;
 
 var animatableProperties = [
@@ -161,13 +161,10 @@ $(document.styleSheets).each(function(){
 	//       and we need to find to opacity? Or we can just use the filter: property
 	
 	var rules = this.cssRules ? this.cssRules : this.rules;
-	//$(rules).each(function(){
 	for(var i = 0; i < rules.length; i++){
 		var that = rules[i];
 		var ruleInfo = {
-			selectorText:that.selectorText/*.replace(/(?:^| )([A-Z][A-Z]+)\b/g, function(m){
-				return m.toLowerCase()
-			})*/,
+			selectorText:that.selectorText,
 			style:{},
 			transitionProperty:['all'],
 			transitionDuration:0, //ms
@@ -293,9 +290,30 @@ $(document.styleSheets).each(function(){
 		//Store this rule and associate it with this ruleIndex (so that the binding can call up the rule that it was part of)
 		cssTransitions.rules[ruleIndex] = ruleInfo;
 		
-		//Create a function for adding a binding to this rule; this function is called once the binding XML file is successfully loaded in order to avoid flash of unstyled content
-		//var that = this;
+		//In MSIE, for the behavior in a :hover selector to be activated, some DOM change on the element needs to happen
+		//    in a timeout "thread"
+		if($.browser.msie){
+			var hoverPos;
+			if((hoverPos = ruleInfo.selectorText.indexOf(':hover')) != -1 ){
+				var beforeHoverSelector = ruleInfo.selectorText.substr(0, hoverPos);
+				var domChanger = function(){
+					var $this = $(this);
+					window.setTimeout(function(){
+						$this.addClass('temporary-ie-class').removeClass('temporary-ie-class');
+					}, 0)
+				};
+				
+				$(beforeHoverSelector).hover(
+					/** mouseover **/
+					domChanger,
+					/** mouseout **/
+					domChanger
+				);
+			}
+		}
 		
+		
+		//Create a function for adding a binding to this rule; this function is called once the binding XML file is successfully loaded in order to avoid flash of unstyled content
 		if(isHTC){
 			//that.style.binding = "url('" + cssTransitions.bindingURL + "?rule=" + i + "&foo=test.htc')";
 			//console.info(that)
@@ -304,7 +322,6 @@ $(document.styleSheets).each(function(){
 			
 			//console.info(cssTransitions.bindingURL + "?rule=" + i)
 			that.style.behavior = 'url("' + cssTransitions.bindingURL + "?rule=" + ruleIndex + '")'; // + "&time=" + (new Date()).valueOf()
-			
 		}
 		else {
 
@@ -327,9 +344,7 @@ $(document.styleSheets).each(function(){
 			);
 		}
 		
-		
 		ruleIndex++;
-	//});
 	}
 	
 });
@@ -375,7 +390,6 @@ cssTransitions.applyRule = function(el, ruleIndex){
 					}
 					return false;
 				});
-				
 			});
 			
 			//If no baseRule was found, then this selector is not associated with any transition; -1 means this
@@ -389,12 +403,6 @@ cssTransitions.applyRule = function(el, ruleIndex){
 	//If this rule is not the base rule, then we need to animate? As in :target. Can this be done to animate the appearance of new elements?
 	var rule = cssTransitions.rules[ruleIndex];
 	var baseRule = cssTransitions.rules[baseRuleIndex];
-	
-	if(window.console){ //DEBUG
-		console.info(rule.selectorText)
-		//console.info(baseRule);
-	}
-	
 	var transitionStyle = {};
 
 	//Transition all properties

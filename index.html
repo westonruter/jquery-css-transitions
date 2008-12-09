@@ -28,9 +28,9 @@
     
     
     
-    <!--<ol>
-        <li style='behavior:url("test.htc#rule1")'>Add more items to me!</li>  
-    </ol>-->
+    <ol>
+        <li id="test" style=''>Add more items to me!</li>  
+    </ol>
 
 
     <hr>
@@ -59,18 +59,39 @@
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.js"></script>
 	<script type="text/javascript" src="jquery.color.js"></script>
 	<script type="text/javascript" src="jquery.css-transitions.js"></script>
-    <script type="text/javascript">
+    <!--<script type="text/javascript">
     var $ = jQuery;
     
     $('#bar').hover(
-        function(){ $(this).addClass('hover'); },
-        function(){ $(this).removeClass('hover'); }
+        function(){
+            var $this = jQuery(this);
+            setTimeout(function(){
+                $this.addClass('foof-hover').removeClass('foof-hover');
+            }, 0);
+        },
+        function(){
+            var $this = jQuery(this);
+            setTimeout(function(){
+                $this.addClass('foof-hover').removeClass('foof-hover');
+            }, 0);
+        }
     );
     $('#bar').mousedown(function(){
-        $(this).addClass('active');
+        var $this = jQuery(this);
+        console.info('active on')
+        setTimeout(function(){
+            $this.addClass('foof-active').removeClass('foof-active');
+            $this.addClass('active');
+        }, 0);
     }).mouseup(function(){
-        $(this).removeClass('active');
+        var $this = jQuery(this);
+        console.info('active off')
+        $this.removeClass('active');
+        setTimeout(function(){
+            $this.addClass('foof-active').removeClass('foof-active');
+        }, 0);
     });
-    </script>
+    
+    </script>-->
 </body>
 </html>

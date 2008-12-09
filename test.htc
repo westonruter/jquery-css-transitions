@@ -1,5 +1,5 @@
 <PUBLIC:COMPONENT>
 	<SCRIPT LANGUAGE="JScript">
-		alert(element)
+		window.alert(element)
 	</SCRIPT>
 </PUBLIC:COMPONENT>

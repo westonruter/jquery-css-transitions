@@ -53,8 +53,8 @@
         color:blue;
         width:80%;
     }
-	#bar:active
-	/*#bar.active*/ {
+	
+	#bar:active {
         /*@ transition-rule @*/
         padding:35px;
         background-color:yellow;

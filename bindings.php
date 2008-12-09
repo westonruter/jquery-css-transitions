@@ -42,7 +42,6 @@ header('content-type:text/x-component');
 ?>
 <PUBLIC:COMPONENT NAME="rule<?php echo (int)($_GET['rule']); ?>">
 	<SCRIPT LANGUAGE="JScript">
-		console.info(<?php echo (int)($_GET['rule']) ?>);
 		window.cssTransitions.applyRule(element, <?php echo (int)($_GET['rule']) ?>);
 	</SCRIPT>
 </PUBLIC:COMPONENT>
