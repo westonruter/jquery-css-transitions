@@ -1,10 +1,25 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><!-- XHTML5 -->
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title>CSS Transitions Implemented by jQuery Animations</title>
 	
     <script type="text/javascript">
     var xblConsole = window.console;
+    
+    var toggleBarOn = function(){
+        if($('#bar').hasClass('on'))
+            $('#bar').removeClass('on');
+        else
+            $('#bar').addClass('on');
+        
+        //This is unfortunately required by IE
+        if(jQuery.browser.msie){
+            window.setTimeout(function(){
+                $('#bar, #bar p').addClass('temp-ie-class').removeClass('temp-ie-class');
+            }, 0)
+        }
+        
+    };
     </script>
     
     <link rel="stylesheet" href="style.css" type="text/css" media="screen" />
@@ -18,7 +33,7 @@
     Do not use short hand properties for the transition-property values. transition-property:all is not allowed</p>
     <nav>
         <a href="#bar">Click for :target rule</a><br />
-        <button onclick="if($('#bar').hasClass('on')) $('#bar').removeClass('on'); else $('#bar').addClass('on'); ">Click for .on rule</button>
+        <button onclick="toggleBarOn()">Click for .on rule</button>
     </nav>
     <div id="bar">
     <p>

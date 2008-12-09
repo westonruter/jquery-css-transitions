@@ -36,7 +36,7 @@ if(false && window.console && console.profile){
 var $ = jQuery;
 
 //Return of if CSS Transitions are supported natively
-var test = $('<div style="-moz-transition-duration:1s; -webkit-transition-duration:1s; transition-duration:1s; -moz-binding:none; binding:none;"></div>')[0];
+var test = $('<div style="-moz-transition-duration:1s; -webkit-transition-duration:1s; transition-duration:1s; -moz-binding:none; behavior:none; -ms-behavior:none;"></div>')[0];
 if(test.style.transitionDuration || test.style.mozTransitionDuration || test.style.webkitTransitionDuration)
 	return;
 
@@ -47,8 +47,12 @@ if(test.style.MozBinding){ //for Mozilla
 	bindingPropertyName = 'MozBinding';
 	isXBL = true;
 }
-else if(test.style.binding){ //for MSIE
+else if(test.style.behavior){ //for MSIE
 	bindingPropertyName = 'behavior';
+	isHTC = true;
+}
+else if(test.style.MsBehavior){ //for MSIE
+	bindingPropertyName = 'MsBehavior';
 	isHTC = true;
 }
 else //Quit since bindings aren't supported
@@ -327,7 +331,7 @@ $(document.styleSheets).each(function(){
 			
 			//console.info(cssTransitions.bindingURL + "?rule=" + i)
 			var url = cssTransitions.bindingURL + "?rule=" + ruleIndex;
-			that.style.behavior = 'url("' + url + '")'; // + "&time=" + (new Date()).valueOf()
+			that.style[bindingPropertyName] = 'url("' + url + '")'; // + "&time=" + (new Date()).valueOf()
 			prefetchURLs.push(url);
 		}
 		else {
@@ -337,7 +341,7 @@ $(document.styleSheets).each(function(){
 					//if(isXBL){
 						return function(){
 							//rule.style.MozBinding = "url('" + cssTransitions.bindingURL + "#rule" + i + "')";
-							rule.style.MozBinding = "url('" + cssTransitions.bindingURL + "#rule" + i + "')";
+							rule.style[bindingPropertyName] = "url('" + cssTransitions.bindingURL + "#rule" + i + "')";
 						}
 					//}
 					//else {
@@ -470,7 +474,8 @@ if(isXBL){
 		});
 	});
 }
-else {
+//Only prefetch if IE 8 because IE 7 cannot cache HTC files (huge problem)
+else if(isHTC && $.browser.msie && parseFloat($.browser.version) >= 8){
 	$(prefetchURLs).each(function(){
 		$.get(this);
 	});
