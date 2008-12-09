@@ -118,6 +118,7 @@ var cssTransitions = window.cssTransitions = {
 $(function(){
 
 var bindingAppliers = [];
+var prefetchURLs = [];
 
 var ruleIndex = 0;
 $(document.styleSheets).each(function(){
@@ -321,7 +322,9 @@ $(document.styleSheets).each(function(){
 			//that.style.behavior = 'url(test.htc?rule=' + i + ')';
 			
 			//console.info(cssTransitions.bindingURL + "?rule=" + i)
-			that.style.behavior = 'url("' + cssTransitions.bindingURL + "?rule=" + ruleIndex + '")'; // + "&time=" + (new Date()).valueOf()
+			var url = cssTransitions.bindingURL + "?rule=" + ruleIndex;
+			that.style.behavior = 'url("' + url + '")'; // + "&time=" + (new Date()).valueOf()
+			prefetchURLs.push(url);
 		}
 		else {
 
@@ -348,7 +351,6 @@ $(document.styleSheets).each(function(){
 	}
 	
 });
-//console.info(bindingAppliers)
 
 //Function which is called by the behaviors whenever one is constructed
 cssTransitions.applyRule = function(el, ruleIndex){
@@ -405,6 +407,9 @@ cssTransitions.applyRule = function(el, ruleIndex){
 	var baseRule = cssTransitions.rules[baseRuleIndex];
 	var transitionStyle = {};
 
+	if(window.console && console.info)
+		console.info(rule.selectorText);
+
 	//Transition all properties
 	if(baseRule.transitionProperty[0] == 'all'){
 		for(var name in rule.style){
@@ -459,6 +464,11 @@ if(isXBL){
 		$(bindingAppliers).each(function(){
 			this()
 		});
+	});
+}
+else {
+	$(prefetchURLs).each(function(){
+		$.get(this);
 	});
 }
 //else {

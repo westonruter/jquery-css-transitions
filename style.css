@@ -7,7 +7,7 @@
         
     }
     
-    body > #bar {
+    #bar {
         /*@ transition-rule @*/
         
         background-color:#EEE;
