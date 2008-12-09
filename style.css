@@ -7,7 +7,7 @@
         
     }
     
-    #bar {
+    #bar p {
         /*@ transition-rule @*/
         
         background-color:#EEE;
@@ -31,14 +31,14 @@
         
     }
     
-    #bar:target {
+    #bar:target p {
         /*@ transition-rule @*/
         padding:10px;
         background-color:blue;
         color:white;
         width:80%;
     }
-    #bar.on {
+    #bar.on p {
         /*@ transition-rule @*/
         padding:40px 15px;
         background-color:pink;
@@ -46,7 +46,7 @@
         width:70%;
     }
 	/*#bar:hover,*/
-	#bar:hover {
+	#bar:hover p {
         /*@ transition-rule @*/
         padding:25px;
         background-color:cyan;
@@ -54,7 +54,7 @@
         width:80%;
     }
 	
-	#bar:active {
+	#bar:active p {
         /*@ transition-rule @*/
         padding:35px;
         background-color:yellow;

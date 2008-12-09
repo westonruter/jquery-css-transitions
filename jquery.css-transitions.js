@@ -297,13 +297,17 @@ $(document.styleSheets).each(function(){
 			var hoverPos;
 			if((hoverPos = ruleInfo.selectorText.indexOf(':hover')) != -1 ){
 				var beforeHoverSelector = ruleInfo.selectorText.substr(0, hoverPos);
-				var domChanger = function(){
-					var $this = $(this);
-					window.setTimeout(function(){
-						$this.addClass('temporary-ie-class').removeClass('temporary-ie-class');
-					}, 0)
-				};
-				
+				var afterHoverSelector = ruleInfo.selectorText.substr(hoverPos+6);
+				var domChanger = (function(afterSelector){
+					return function(){
+						var $this = $(this);
+						window.setTimeout(function(){
+							$this.addClass('temporary-ie-class').removeClass('temporary-ie-class');
+							if(afterSelector)
+								$this.find(afterSelector).addClass('temporary-ie-class').removeClass('temporary-ie-class');
+						}, 0)
+					};
+				})(afterHoverSelector);
 				$(beforeHoverSelector).hover(
 					/** mouseover **/
 					domChanger,
