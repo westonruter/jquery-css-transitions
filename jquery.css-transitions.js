@@ -323,6 +323,7 @@ $(document.styleSheets).each(function(){
 		
 		
 		//Create a function for adding a binding to this rule; this function is called once the binding XML file is successfully loaded in order to avoid flash of unstyled content
+		//To avoid using external files altogether, it would be best if we could assign the behaviors to :url("javascript:cssTransitions.applyRule(this, ' + i + '); void(0);")
 		if(isHTC){
 			//that.style.binding = "url('" + cssTransitions.bindingURL + "?rule=" + i + "&foo=test.htc')";
 			//console.info(that)
@@ -332,6 +333,7 @@ $(document.styleSheets).each(function(){
 			//console.info(cssTransitions.bindingURL + "?rule=" + i)
 			var url = cssTransitions.bindingURL + "?rule=" + ruleIndex;
 			that.style[bindingPropertyName] = 'url("' + url + '")'; // + "&time=" + (new Date()).valueOf()
+			//that.style[bindingPropertyName] = 'url("javascript://alert(1); void(0);")';
 			prefetchURLs.push(url);
 		}
 		else {
@@ -468,7 +470,14 @@ if(isXBL){
 		});
 	});
 }
-//Only prefetch if IE 8 because IE 7 cannot cache HTC files (huge problem)
+//Only prefetch if IE 8 because IE 7 cannot cache HTC files (huge problem) (TODO)
+//"Internet Explorer contains several caching bugs; it often fails to cache pages that are served with gzip compression (used
+//   by many, many sites, including Google, this site, all sites hosted by Dreamhosts, etc etc etc). It usually fails to cache
+//   .htc behaviour files, or images/CSS/JavaScript files that are loaded as a result of running a .htc file, and will often load them once
+//   for every element they apply to, and again every time the mouse moves over them. This can result in hundreds of extra requests for a
+//   single page (400 per visitor on one of my pages, until I removed the behaviour), and as a result, Internet Explorer can look far more
+//   popular than it actually is." <http://www.howtocreate.co.uk/nostats.html>
+// See: http://support.microsoft.com/kb/319176
 else if(isHTC && $.browser.msie && parseFloat($.browser.version) >= 8){
 	$(prefetchURLs).each(function(){
 		$.get(this);

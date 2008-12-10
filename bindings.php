@@ -1,8 +1,9 @@
 <?php
 
-$expires = str_replace('+0000', 'GMT', gmdate('r', time() + 3600*24*7));
+$deltaSeconds = 3600*24;
+$expires = str_replace('+0000', 'GMT', gmdate('r', time() + $deltaSeconds));
 header('Expires: ' . $expires); //one day later
-header('Cache-Control: public');
+header('Cache-Control: max-age=' . $deltaSeconds);
 header('Last-Modified: ' . str_replace('+0000', 'GMT', gmdate('r', filemtime(__FILE__))));
 
 /*
