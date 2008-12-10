@@ -362,11 +362,7 @@ $(document.styleSheets).each(function(){
 
 //Function which is called by the behaviors whenever one is constructed
 cssTransitions.applyRule = function(el, ruleIndex){
-	//The following code needs to be placed into a global jQuery.cssTransitions.activate(ruleIndex, this)
-	//To keep all code possible in the JS file; we also need to put cssTransitions.rules into jQuery.cssTransitions.rules
-	
-	
-	var $el = jQuery(el);
+	var $el = $(el);
 	var baseRuleIndex;
 	if(cssTransitions.rules[ruleIndex].isBaseRule){
 		baseRuleIndex = cssTransitions.baseRuleLookup[ruleIndex] = ruleIndex;
@@ -380,7 +376,6 @@ cssTransitions.applyRule = function(el, ruleIndex){
 		//Find the base rule for this element; this allows elements to be inserted dynamically!
 		else if(isNaN(baseRuleIndex)){
 			$(cssTransitions.baseRules).each(function(){
-				var baseRule = this;
 				//The following will not work because: Only simple expressions are supported. Complex expressions,
 				//   such as those containing hierarchy selectors (such as +, ~, and >) will always return 'true'.
 				//if($el.is(baseRule.selector)){
@@ -390,20 +385,19 @@ cssTransitions.applyRule = function(el, ruleIndex){
 				//Iterate over each of elements that match the selector, and see if they match this element; if so, then this selector's baseRule should be applied to this
 				//   We should cache these queries and only delete them when MutationEvents occur
 				//   Note: Two rules may have the same selector
-				//if(!baseRule.elementCache)
-				//	baseRule.elementCache = $(baseRule.selector);
-				//baseRule.elementCache.each(function(){
-				$(baseRule.selector).each(function(){
-					if(el == this){
-						cssTransitions.baseRuleLookup[ruleIndex] = baseRuleIndex = baseRule.index;
-						return true;
+				var els = $(this.selector);
+				for(var i = 0; i < els.length; i++){ //using for loop here because unknown error when doing element identity tests inside
+					if(el == els[i]){
+						cssTransitions.baseRuleLookup[ruleIndex] = baseRuleIndex = this.index;
+						break;
 					}
-					return false;
-				});
+				}
 			});
 			
 			//If no baseRule was found, then this selector is not associated with any transition; -1 means this
 			if(isNaN(baseRuleIndex)){
+				if(window.console && console.error)
+					console.error("No base match for ", el);
 				cssTransitions.baseRuleLookup[ruleIndex] = -1;
 				return;
 			}
