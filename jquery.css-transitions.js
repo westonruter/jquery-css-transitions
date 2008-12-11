@@ -324,17 +324,27 @@ $(document.styleSheets).each(function(){
 		
 		//Create a function for adding a binding to this rule; this function is called once the binding XML file is successfully loaded in order to avoid flash of unstyled content
 		//To avoid using external files altogether, it would be best if we could assign the behaviors to :url("javascript:cssTransitions.applyRule(this, ' + i + '); void(0);")
+		//Or we can do this: behavior:expression("")
 		if(isHTC){
-			//that.style.binding = "url('" + cssTransitions.bindingURL + "?rule=" + i + "&foo=test.htc')";
-			//console.info(that)
-			//console.info(that.style)
-			//that.style.behavior = 'url(test.htc?rule=' + i + ')';
-			
-			//console.info(cssTransitions.bindingURL + "?rule=" + i)
 			var url = cssTransitions.bindingURL + "?rule=" + ruleIndex;
-			that.style[bindingPropertyName] = 'url("' + url + '")'; // + "&time=" + (new Date()).valueOf()
+			//var url = cssTransitions.bindingURL + "/rule/" + ruleIndex; //do this to help ensure it is cached
+			//Loathing the fact that IE apparently doesn't implement setExpression on a CSSStyleRule's CSSStyleDeclaration "style" object
+			that.style[bindingPropertyName] = 'url("' + url + '")';
+			
+			//Prefetch the binding so that there is no delay later
+			//Calling $.get(url) doesn't do it; behaviors attached via CSS seem to have a separate cache so if this is done then everything is downloaded twice
+			//In order to successfully cache the behavior, we have to attach the behavior to a temporary element that is thrown away
+			var span = document.createElement('span');
+			span.style[bindingPropertyName] = that.style[bindingPropertyName];
+			
+			//If Gears is available, we could store the file in a LocalServer but this would cause there to be a dialog box
 			//that.style[bindingPropertyName] = 'url("javascript://alert(1); void(0);")';
-			prefetchURLs.push(url);
+			//that.style.setExpression('width', "cssTransitions.applyRule(this, " + i + ")");
+			//that.style.setExpression(bindingPropertyName, "cssTransitions.applyRule(this, " + i + ")");
+			//if we reference an HTML page will it avoid refreshing?
+			//is there really no way to put multiple behaviors in one file?
+			//The only way that we can use expressions is if we statically put something in the rule like:
+			//  unusedProperty:expression("notifyAppliedRule(rule.selectorText))")
 		}
 		else {
 
@@ -425,7 +435,7 @@ cssTransitions.applyRule = function(el, ruleIndex){
 	}
 	//Only transition the properties that were explicitly provided
 	else {
-		jQuery(baseRule.transitionProperty).each(function(){
+		$(baseRule.transitionProperty).each(function(){
 			var name = this;
 			
 			if(!el.style[name])
@@ -457,13 +467,11 @@ cssTransitions.applyRule = function(el, ruleIndex){
 	//We need to get all of the bindings that are applied in the cascade
 };
 
-//Create the URL to the bindings document
-cssTransitions.bindingURL += "?count=" + ruleIndex + "&time=" + (new Date()).valueOf();
-//cssTransitions.bindingURL = window.location.href.replace(/#.*/,'') + cssTransitions.bindingURL;
-
 
 //Prefetch the binding document and then apply the bindings once loaded
 if(isXBL){
+	//Create the URL to the bindings document
+	cssTransitions.bindingURL += "?count=" + ruleIndex;
 	$.get(cssTransitions.bindingURL, null, function(data, textStatus){
 		$(bindingAppliers).each(function(){
 			this()
@@ -478,17 +486,11 @@ if(isXBL){
 //   single page (400 per visitor on one of my pages, until I removed the behaviour), and as a result, Internet Explorer can look far more
 //   popular than it actually is." <http://www.howtocreate.co.uk/nostats.html>
 // See: http://support.microsoft.com/kb/319176
-else if(isHTC && $.browser.msie && parseFloat($.browser.version) >= 8){
-	$(prefetchURLs).each(function(){
-		$.get(this);
-	});
-}
-//else {
-//	$(bindingAppliers).each(function(){
-//		this()
+//else if(isHTC /*&& $.browser.msie && parseFloat($.browser.version) >= 8*/){
+//	$(prefetchURLs).each(function(){
+//		$.get(this);
 //	});
 //}
-
 
 
 function cssNameToJsNameCallback(c, b){

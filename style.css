@@ -28,7 +28,8 @@
         /*transition-delay:1s;*/
         
 		/*expression:"console.info('foo')";*/
-        
+		/*Note: once this is called once, it should remove itself? */
+        /*content:expression(document.body.appendChild(document.createTextNode(this.innerText)));*/
     }
     
     #bar:target p {
