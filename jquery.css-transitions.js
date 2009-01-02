@@ -1,5 +1,5 @@
 /* 
- * CSS Transitions Implemented with jQuery Animations 0.2
+ * CSS Transitions Implemented with jQuery Animations 0.3
  *  by Weston Ruter <http://weston.ruter.net/>, Shepherd Interactive <http://www.shepherd-interactive.com/>
  *
  * Requires PHP (or some another dynamic scripting language) to generate the binding
@@ -15,6 +15,9 @@
  * This implementation requires that only one transition rule be applied at a time,
  * and that each transition rule include style properties for each of the
  * transition-property values specified.
+ *
+ * Stylesheets must be loaded externally via LINK element because some browsers don't
+ * permit their original text contents to be inspected.
  *
  * IE7 requires a special workaround when using pseudo-classes in the selectors
  * for transition rules (actually, it only supports the one :hover; the :active
@@ -36,6 +39,8 @@
  * Firefox. If colors are being transitioned, be sure to include the jQuery
  * color animation plugin.
  *
+ * The property transition-property:all is not supported, nor are ...
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -54,6 +59,7 @@
 @todo Implement transition-timing-function
 @todo We need to support the shorthand notation for transitions
 @todo Impement transition events?
+@todo Add support for :focus
  */
 
 (function(){
@@ -82,6 +88,8 @@ else if(test.style.MsBehavior){ //for MSIE
 else //Quit since behaviors/bindings aren't supported
 	return;
 
+//Not all of these are supported by jQuery, so additional jQuery animation plugins
+//  may beed to be included, such as jQuery Color Animations: http://plugins.jquery.com/project/color
 var animatableProperties = [
 	'backgroundColor',
 	'backgroundImage',
@@ -137,9 +145,127 @@ var animatableProperties = [
 //Set up global bookkeeping object
 var cssTransitions = window.cssTransitions = {
 	rules:[],
+	hackedSelectors:[],
+	//hoverSelectors:[], //for MSIE
+	//activeSelectors:[], //for MSIE
 	baseRules:[],
 	baseRuleLookup:{} //keys are rules
 };
+var types = {
+	HOVER  : 1,
+	ACTIVE : 2
+}
+
+//If IE, add event handlers to provide support for :hover and :active pseudo classes
+if($.browser.msie){
+	cssTransitions.refreshDOMForMSIE = function(){
+		//if(!context)
+		//	context = document.documentElement;
+		
+		$(cssTransitions.hackedSelectors).each(function(){
+			var selector = this;
+			$(selector.primarySelector).each(function(){
+				var $this = $(this);
+				
+				//Don't assign hover event handler twice (store the decendent selectors in dictionary)
+				if(!$this.data('cssTransitionDescendantSelectors'))
+					$this.data('cssTransitionDescendantSelectors', {});
+				var data = $this.data('cssTransitionDescendantSelectors');
+				if(data[selector.descendantSelector] & selector.type)
+					return;
+				data[selector.descendantSelector] |= selector.type;
+				
+				//Attach the mutator to the appropriate event depending on the type of the pseudo class
+				switch(selector.type){
+					case types.HOVER:
+				
+						//Mutate the document for MSIE so that it will attach the behavior
+						var touchDOM = function(){
+							window.setTimeout(function(){
+								$this.addClass('temporary-ie-class').removeClass('temporary-ie-class');
+								if(selector.descendantSelector)
+									$this.find(selector.descendantSelector).addClass('temporary-ie-class').removeClass('temporary-ie-class');
+							}, 0)
+						};
+						
+						$this.hover(touchDOM, touchDOM);
+						break;
+					
+					case types.ACTIVE:
+						$this.mousedown(touchDOM).mouseup(touchDOM); //this isn't doing it; we'll need to explicitly run the selector 
+						
+						////Manually apply the selector to the elements on the page
+						//$this.mousedown(function(){
+						//	//Only apply :active rule if another :active rule hasn't already been applied or if the previously applied :active
+						//	//  rule's index is less than this selector's rule's index
+						//	//  (QUESTION: How is cascade being computed? We should allow it to override if rule index is greater)
+						//	if(selector.descendantSelector){
+						//		$this.find(selector.descendantSelector).each(function(){
+						//			var history = $(this).data('cssTransitionRuleIndexHistory');
+						//			if(!history || cssTransitions.rules[history[0]].selectorText.indexOf(':active') == -1){
+						//				if(history){
+						//					if(selector.ruleIndex > history[0]){
+						//						cssTransitions.applyRule(this, selector.ruleIndex);
+						//						$(this).data('cssTransitionRuleNonActiveRuleIndex', history[0]);
+						//					}
+						//				}
+						//				else {
+						//					cssTransitions.applyRule(this, selector.ruleIndex);
+						//				}
+						//				
+						//			}	
+						//		});
+						//	}
+						//	else {
+						//		var history = $this.data('cssTransitionRuleIndexHistory');
+						//		if(!history || cssTransitions.rules[history[0]].selectorText.indexOf(':active') == -1){
+						//			if(history){
+						//				if(selector.ruleIndex > history[0]){
+						//					cssTransitions.applyRule(this, selector.ruleIndex);
+						//					$this.data('cssTransitionRuleNonActiveRuleIndex', history[0]);
+						//				}
+						//			}
+						//			else {
+						//				cssTransitions.applyRule(this, selector.ruleIndex);
+						//			}
+						//		}
+						//	}
+						//})
+						////Unapply the applied :active selector
+						//.mouseup(function(){
+						//	//Apply the previous non-:active rule (stored in data cssTransitionRuleNonActiveRuleIndex)
+						//	if(selector.descendantSelector){
+						//		$this.find(selector.descendantSelector).each(function(){
+						//			var previousRuleIndex = $(this).data('cssTransitionRuleNonActiveRuleIndex');
+						//			if(!previousRuleIndex)
+						//				return;
+						//			$(this).removeData('cssTransitionRuleNonActiveRuleIndex');
+						//			cssTransitions.applyRule(this, previousRuleIndex);
+						//		});
+						//	}
+						//	else {
+						//		var previousRuleIndex = $this.data('cssTransitionRuleNonActiveRuleIndex');
+						//		if(!previousRuleIndex)
+						//			return;
+						//		$(this).removeData('cssTransitionRuleNonActiveRuleIndex');
+						//		cssTransitions.applyRule(this, previousRuleIndex);
+						//	}
+						//	
+						//});
+						//break;
+				}
+			});
+			
+		});
+		
+	};
+	
+	//Refresh for IE upon DOM load
+	$(cssTransitions.refreshDOMForMSIE);
+}
+else {
+	cssTransitions.refreshDOMForMSIE = function(){};
+}
 
 //If binding URL is provided use it
 if(window.cssTransitionsBindingURL){
@@ -336,26 +462,23 @@ $(document.styleSheets).each(function(){
 		//In MSIE, for the behavior in a :hover selector to be activated, some DOM change on the element needs to happen
 		//    in a timeout "thread"
 		if($.browser.msie){
-			var hoverPos;
-			if((hoverPos = ruleInfo.selectorText.indexOf(':hover')) != -1 ){
-				var beforeHoverSelector = ruleInfo.selectorText.substr(0, hoverPos);
-				var afterHoverSelector = ruleInfo.selectorText.substr(hoverPos+6);
-				var domChanger = (function(afterSelector){
-					return function(){
-						var $this = $(this);
-						window.setTimeout(function(){
-							$this.addClass('temporary-ie-class').removeClass('temporary-ie-class');
-							if(afterSelector)
-								$this.find(afterSelector).addClass('temporary-ie-class').removeClass('temporary-ie-class');
-						}, 0)
-					};
-				})(afterHoverSelector);
-				$(beforeHoverSelector).hover(
-					/** mouseover **/
-					domChanger,
-					/** mouseout **/
-					domChanger
-				);
+			var pos;
+			if((pos = ruleInfo.selectorText.indexOf(':hover')) != -1 ){
+				cssTransitions.hackedSelectors.push({
+					primarySelector    : ruleInfo.selectorText.substr(0, pos),
+					descendantSelector : ruleInfo.selectorText.substr(pos+6).replace(/^\s+$/, ''),
+					type               : types.HOVER,
+					ruleIndex          : ruleIndex
+				});
+			}
+			
+			if((pos = ruleInfo.selectorText.indexOf(':active')) != -1 ){
+				cssTransitions.hackedSelectors.push({
+					primarySelector    : ruleInfo.selectorText.substr(0, pos),
+					descendantSelector : ruleInfo.selectorText.substr(pos+7).replace(/^\s+$/, ''),
+					type               : types.ACTIVE,
+					ruleIndex          : ruleIndex
+				});
 			}
 		}
 		
@@ -413,6 +536,13 @@ $(document.styleSheets).each(function(){
 //Function which is called by the behaviors whenever one is constructed
 cssTransitions.applyRule = function(el, ruleIndex){
 	var $el = $(el);
+	//if(!$el.data('cssTransitionRuleIndexHistory'))
+	//	$el.data('cssTransitionRuleIndexHistory', []);
+	//$el.data('cssTransitionRuleIndexHistory').unshift(ruleIndex); //store this for :active support
+	//for MSIE, if an :active rule has been applied, don't proceed until the mouseup has been executed
+	//if($el.data('cssTransitionRuleNonActiveRuleIndex'))
+	//	return;
+	
 	var baseRuleIndex;
 	if(cssTransitions.rules[ruleIndex].isBaseRule){
 		baseRuleIndex = cssTransitions.baseRuleLookup[ruleIndex] = ruleIndex;

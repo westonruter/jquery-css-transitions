@@ -1,123 +1,73 @@
 
-    
-    address {
-        
-    }
-    hr {
-        
-    }
-    
-    #bar p {
-        /*@ transition-rule @*/
-        
-        background-color:#EEE;
-        color:black;
-        padding-top:5px;
-        padding-bottom:5px;
-        padding-left:5px;
-        padding-right:5px;
-        width:50%;
-        
-        -webkit-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
-        -webkit-transition-duration:0.5s;
-        /*-webkit-transition-delay:1s;*/
-        -moz-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
-        -moz-transition-duration:0.5s;
-        transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
-        transition-duration:0.5s;
-        /*transition-delay:1s;*/
-        
-		/*expression:"console.info('foo')";*/
-		/*Note: once this is called once, it should remove itself? */
-        /*content:expression(document.body.appendChild(document.createTextNode(this.innerText)));*/
-    }
-    
-    #bar:target p {
-        /*@ transition-rule @*/
-        padding:10px;
-        background-color:blue;
-        color:white;
-        width:80%;
-    }
-    #bar.on p {
-        /*@ transition-rule @*/
-        padding:40px 15px;
-        background-color:pink;
-        color:red;
-        width:70%;
-    }
-	/*#bar:hover,*/
-	#bar:hover p {
-        /*@ transition-rule @*/
-        padding:25px;
-        background-color:cyan;
-        color:blue;
-        width:80%;
-    }
+
+#foo p {
+	/*@ transition-rule @*/
 	
-	#bar:active p {
-        /*@ transition-rule @*/
-        padding:35px;
-        background-color:yellow;
-        color:green;
-        width:40%;
-    }
-    
-    body > #foo {
-        background-color:#EEE;
-        color:black;
-        padding-top:5px;
-        padding-bottom:5px;
-        padding-left:5px;
-        padding-right:5px;
-        width:50%;
-        
-        -webkit-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
-        -webkit-transition-duration:0.5s;
-        -moz-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
-        -moz-transition-duration:0.5s;
-        transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
-        transition-duration:0.5s;
-        
-        /*@ transition-rule @*/
-    }
-    
-    #foo:target {
-        /*width:70%;
-        background-color:orange;
-        color:green;
-        padding:15px;*/
-        padding:20px 20px 20px 20px;
-        /*@ transition-rule @*/
-    }
-    /* This does not work; only one binding is set at a time */
-    /*
-    body #foo.on { 
-        background-color:blue;
-    }
-    */
-    #foo.on {
-        /*width:80%;
-        background-color:cyan;
-        color:purple;
-        padding:30px;*/
-        color:red;
-        /*@ transition-rule @*/
-    }
-    #foo:hover {
-        /*width:60%;
-        background-color:yellow;
-        color:red;
-        padding:10px;*/
-        background-color:lime;
-        /*@ transition-rule @*/
-    }
-    #foo:active {
-        /*width:70%;
-        background-color:lime;
-        color:blue;
-        padding:20px;*/
-        width:80%;
-        /*@ transition-rule @*/
-    }
-    
+	background-color:#EEE;
+	color:black;
+	padding-top:5px;
+	padding-bottom:5px;
+	padding-left:5px;
+	padding-right:5px;
+	width:50%;
+	
+	-webkit-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+	-webkit-transition-duration:0.5s;
+	/*-webkit-transition-delay:1s;*/
+	-moz-transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+	-moz-transition-duration:0.5s;
+	transition-property:background-color, color, width, padding-left, padding-right, padding-top, padding-bottom;
+	transition-duration:0.5s;
+	/*transition-delay:1s;*/
+}
+
+#foo:target p {
+	/*@ transition-rule @*/
+	padding:10px;
+	background-color:blue;
+	color:white;
+	width:80%;
+}
+#foo.bar p {
+	/*@ transition-rule @*/
+	padding:40px 15px;
+	background-color:pink;
+	color:red;
+	width:70%;
+}
+#foo:hover p {
+	/*@ transition-rule @*/
+	padding:25px;
+	background-color:cyan;
+	color:blue;
+	width:80%;
+}
+#foo p:hover {
+	/*@ transition-rule @*/
+	padding:50px;
+	background-color:lime;
+	color:brown;
+	width:70%;
+}
+#foo:active p {
+	/*@ transition-rule @*/
+	padding:35px;
+	background-color:yellow;
+	color:green;
+	width:40%;
+}
+#foo p:active {
+	/*@ transition-rule @*/
+	padding:35px;
+	background-color:orange;
+	color:purple;
+	width:40%;
+}
+
+
+.on {
+	color:green !important;
+}
+.disabled {
+	color:gray !important;
+}
