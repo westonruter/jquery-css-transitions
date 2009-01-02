@@ -1,12 +1,41 @@
 /* 
- * CSS Transitions Implemented with jQuery Animations 0.1
- *  by Weston Ruter, Shepherd Interactive <http://www.shepherd-interactive.com/>
+ * CSS Transitions Implemented with jQuery Animations 0.2
+ *  by Weston Ruter <http://weston.ruter.net/>, Shepherd Interactive <http://www.shepherd-interactive.com/>
  *
- * This implementation must be able to initiate transition animations with:
- *   - dynamic pseudo classes: :hover, :active, :focus
- *   - changing a class name
+ * Requires PHP (or some another dynamic scripting language) to generate the binding
+ * behavior stubs. This PHP file is called "bindings.php" and is located in the same
+ * directory as the script by default. If a different filename or path is needed,
+ * it may be specified in the global variable cssTransitionsBindingURL before the
+ * inclusion of this script.
+ *
+ * CSS style rules that contain the transition states must include the following
+ * comment whose contents are "transition-rule"; this signals to the script that
+ * a behavior should be assigned to the rule which when activated will change the
+ * transition style state to contain the styles in the current rule.
+ * This implementation requires that only one transition rule be applied at a time,
+ * and that each transition rule include style properties for each of the
+ * transition-property values specified.
+ *
+ * IE7 requires a special workaround when using pseudo-classes in the selectors
+ * for transition rules (actually, it only supports the one :hover; the :active
+ * pseudo class doesn't seem to effectively apply a binding at all).
+ * For IE to apply the bindings to descendents of an element which is mutated by
+ * the change of a class name "foo" so that a transition rule which has a selector like
+ * body > ul.foo > li gets applied, an additional workaround is required for IE
+ * so that the descendent element "li" has a temporary class name added and then immediately
+ * removed, as in:
+ *
+ *    $('body > ul').addClass('foo');
+ *    if(jQuery.browser.msie)
+ *        $('body > ul > li').addClass('temp-ie-class').removeClass('temp-ie-class');
+ *
+ * this is the only way that IE will recognize that it needs to apply the behavior.
  * 
- * 
+ * This script does nothing if the browser already supports CSS transitions.
+ * This script should be included in the HEAD to avoid flash of unstyled content in
+ * Firefox. If colors are being transitioned, be sure to include the jQuery
+ * color animation plugin.
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -19,18 +48,13 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
-@todo We need to not add a behavior to EVERY rule, just those which provide the properties; if every relevant rule included transition-property:inherit then we could sniff that
+
+@todo Document usage
+@todo See if we can implement :active by means of swapping out temporary classes when onmousedown and onmouseup
 @todo Implement transition-timing-function
 @todo We need to support the shorthand notation for transitions
 @todo Impement transition events?
-@todo We could have an option to restrict all transitions to one CSS file (more HTTP load, but less computation load)
  */
-
-if(false && window.console && console.profile){
-	console.profile("CSS Transitions");
-	window.onload = function(){console.profileEnd("CSS Transitions");}
-}
 
 (function(){
 var $ = jQuery;
@@ -55,7 +79,7 @@ else if(test.style.MsBehavior){ //for MSIE
 	bindingPropertyName = 'MsBehavior';
 	isHTC = true;
 }
-else //Quit since bindings aren't supported
+else //Quit since behaviors/bindings aren't supported
 	return;
 
 var animatableProperties = [
@@ -114,12 +138,26 @@ var animatableProperties = [
 var cssTransitions = window.cssTransitions = {
 	rules:[],
 	baseRules:[],
-	baseRuleLookup:{}, //keys are rules
-	bindingURL:'bindings.php'
+	baseRuleLookup:{} //keys are rules
 };
 
-
-$(function(){
+//If binding URL is provided use it
+if(window.cssTransitionsBindingURL){
+	cssTransitions.bindingURL = cssTransitionsBindingURL;
+}
+//Default binding URL should be the same directory as this script itself.
+else {
+	var baseURL = '/';
+	//Get the base URL to where this script is located
+	$(document.getElementsByTagName('script')).each(function(){
+		if(this.src.indexOf('css-transitions') != -1){
+			baseURL = this.src.replace(/[^\/]+$/, '');
+			return true;
+		}
+		return this.src.indexOf('jquery-css-transitions') == -1
+	});
+	cssTransitions.bindingURL = baseURL + 'bindings.php';
+}
 
 var bindingAppliers = [];
 var prefetchURLs = [];
@@ -422,7 +460,7 @@ cssTransitions.applyRule = function(el, ruleIndex){
 	var transitionStyle = {};
 
 	if(window.console && console.info)
-		console.info(rule.selectorText);
+		console.info("CSS Transition Rule: " + rule.selectorText);
 
 	//Transition all properties
 	if(baseRule.transitionProperty[0] == 'all'){
@@ -514,7 +552,5 @@ function regExpEscape(text) { //from Simon Willison <http://simonwillison.net/20
   return text.replace(arguments.callee.sRE, '\\$1');
 }
 
-
-}); //end jQuery.ready
 
 })(); //end scope
