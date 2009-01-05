@@ -1,6 +1,8 @@
 /* 
- * CSS Transitions Implemented with jQuery Animations 0.3
- *  by Weston Ruter <http://weston.ruter.net/>, Shepherd Interactive <http://www.shepherd-interactive.com/>
+ * CSS Transitions Implemented with jQuery Animations 0.3 <http://shepherd-interactive.googlecode.com/svn/trunk/jquery-css-transitions/>
+ *  by Weston Ruter <http://weston.ruter.net/>
+ *  Copyright 2009, Weston Ruter, Shepherd Interactive <http://www.shepherd-interactive.com/>
+ *  License: GPL 3.0 <http://www.gnu.org/licenses/gpl.html>
  *
  * Requires PHP (or some another dynamic scripting language) to generate the binding
  * behavior stubs. This PHP file is called "bindings.php" and is located in the same
@@ -40,21 +42,7 @@
  * color animation plugin.
  *
  * The property transition-property:all is not supported, nor are ...
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-@todo Document usage
 @todo See if we can implement :active by means of swapping out temporary classes when onmousedown and onmouseup
 @todo Implement transition-timing-function
 @todo We need to support the shorthand notation for transitions
