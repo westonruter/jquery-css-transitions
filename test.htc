@@ -1,5 +1,0 @@
-<PUBLIC:COMPONENT>
-	<SCRIPT LANGUAGE="JScript">
-		window.alert(element)
-	</SCRIPT>
-</PUBLIC:COMPONENT>
