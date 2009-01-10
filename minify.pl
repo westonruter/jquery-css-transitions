@@ -12,7 +12,7 @@ while(<IN>){
 }
 
 
-system("java -jar ../../../yuicompressor.jar jquery.css-transitions.js -o ~temp.js");
+system("java -jar yuicompressor.jar jquery.css-transitions.js -o ~temp.js");
 open IN, "~temp.js";
 while(<IN>){
 	print OUT;
