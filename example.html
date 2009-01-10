@@ -5,7 +5,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<title>CSS Transitions Implemented by jQuery Animations</title>
+	<title>Example of CSS Transitions via jQuery Animation</title>
 	
     
     <!-- CSS transition rules must be in an external stylesheet because some browsers don't allow the original -->
@@ -75,19 +75,17 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     </script>
 </head>
 <body>
-	<h1>CSS Transitions Implemented by jQuery Animations</h1>
+	<h1>Example of CSS Transitions via jQuery Animation</h1>
     
-    <p>The most sophisticated CSS rules are ones in which all of the transition properties are defined in each of the rules. Additionally, only one transition rule can be applied
-    at a time; the rules are mutually exclusive. If if a rule with higher precedent overrides another rule, then the other rule will not be applied as long as it exists. No cascading.
-    Do not use short hand properties for the transition-property values. transition-property:all is not allowed</p>
-    
-    <p>In MSIE, clicking this paragraph will have no effect since <code>:active</code> pseudo-classes don't work with behaviors, apparently.</p>
-    
+    <p>View this page in Firefox 2, Firefox 3, MSIE 7, Safari 3 or Chrome. For more information, see the <a href="http://weston.ruter.net/projects/jquery-css-transitions/" title="CSS Transitions via jQuery Animation">project page</a>.</p>
+	
     <p>
         <button id="toggleClassNameRule" style="color:red">Class is removed</button> <br />
         <button id="toggleTargetRule" style="color:red">:target is removed</button> (unsupported by MSIE)
     </p>
     
+	<p><em>(Transition rules selected by <code>:active</code> do not work in IE.)</em></p>
+	
     <div id="foo">
         <p>
             This is a paragraph that is to be transitioned.
@@ -102,7 +100,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     
 	<hr />
 	<address>
-		<a href="http://weston.ruter.net/">Weston Ruter</a>, <a href="http://shepherd-interactive.com/">Shepherd Interactive</a>, December 2008
+		<a href="http://weston.ruter.net/">Weston Ruter</a>, <a href="http://shepherd-interactive.com/">Shepherd Interactive</a>, January 2009
 	</address>
 </body>
 </html>

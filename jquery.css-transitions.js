@@ -1,53 +1,10 @@
 /* 
- * CSS Transitions Implemented with jQuery Animations 0.3 <http://shepherd-interactive.googlecode.com/svn/trunk/jquery-css-transitions/>
+ * CSS Transitions via jQuery Animation 0.3 <http://weston.ruter.net/projects/jquery-css-transitions/>
  *  by Weston Ruter <http://weston.ruter.net/>
+ *  inspired by Chris Schneider's CSS Effects powered by mootools <http://playground.chrisbk.de/moofx/>
  *  Copyright 2009, Weston Ruter, Shepherd Interactive <http://www.shepherd-interactive.com/>
  *  License: GPL 3.0 <http://www.gnu.org/licenses/gpl.html>
  *
- * Requires PHP (or some another dynamic scripting language) to generate the binding
- * behavior stubs. This PHP file is called "bindings.php" and is located in the same
- * directory as the script by default. If a different filename or path is needed,
- * it may be specified in the global variable cssTransitionsBindingURL before the
- * inclusion of this script.
- *
- * CSS style rules that contain the transition states must include the following
- * comment whose contents are "transition-rule"; this signals to the script that
- * a behavior should be assigned to the rule which when activated will change the
- * transition style state to contain the styles in the current rule.
- * This implementation requires that only one transition rule be applied at a time,
- * and that each transition rule include style properties for each of the
- * transition-property values specified.
- *
- * Stylesheets must be loaded externally via LINK element because some browsers don't
- * permit their original text contents to be inspected.
- *
- * IE7 requires a special workaround when using pseudo-classes in the selectors
- * for transition rules (actually, it only supports the one :hover; the :active
- * pseudo class doesn't seem to effectively apply a binding at all).
- * For IE to apply the bindings to descendents of an element which is mutated by
- * the change of a class name "foo" so that a transition rule which has a selector like
- * body > ul.foo > li gets applied, an additional workaround is required for IE
- * so that the descendent element "li" has a temporary class name added and then immediately
- * removed, as in:
- *
- *    $('body > ul').addClass('foo');
- *    if(jQuery.browser.msie)
- *        $('body > ul > li').addClass('temp-ie-class').removeClass('temp-ie-class');
- *
- * this is the only way that IE will recognize that it needs to apply the behavior.
- * 
- * This script does nothing if the browser already supports CSS transitions.
- * This script should be included in the HEAD to avoid flash of unstyled content in
- * Firefox. If colors are being transitioned, be sure to include the jQuery
- * color animation plugin.
- *
- * The property transition-property:all is not supported, nor are ...
-
-@todo See if we can implement :active by means of swapping out temporary classes when onmousedown and onmouseup
-@todo Implement transition-timing-function
-@todo We need to support the shorthand notation for transitions
-@todo Impement transition events?
-@todo Add support for :focus
  */
 
 (function(){
