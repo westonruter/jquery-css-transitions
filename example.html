@@ -40,11 +40,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             }
             
             //This is unfortunately required by IE since the transition rule selectors point to decendent of #foo and not #foo itself
-            if(jQuery.browser.msie){
-                window.setTimeout(function(){
-                    $('#foo p').addClass('temp-ie-class').removeClass('temp-ie-class');
-                }, 0)
-            }
+            if(jQuery.browser.msie)
+                $('#foo p').addClass('temp-ie-class').removeClass('temp-ie-class');
         });
         
 		if(window.location.hash.substr(1))
