@@ -47,7 +47,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
             }
         });
         
-        window.location.href = "#"; //Reset
+		if(window.location.hash.substr(1))
+			window.location.href = "#"; //Reset
         if($.browser.msie){
             $('#toggleTargetRule').addClass('disabled')[0].disabled = true;
         }
