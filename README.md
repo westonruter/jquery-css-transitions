@@ -34,8 +34,6 @@ if(jQuery.browser.msie)
 
 <p>See a <strong><a href="http://westonruter.github.com/jquery-css-transitions/example.html">lightweight example</a></strong>.</p>
 
-<p>Fork the <a href="http://github.com/westonruter/jquery-css-transitions">project on GitHub</a>.</p>
-
 <h3 id="todo">Unimplemented Features and To-do Items</h3>
 <ul>
     <li>Implement <code>transition-timing-function</code> property (currently only the default <code>ease</code> is supported).</li>
