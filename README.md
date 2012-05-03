@@ -43,3 +43,5 @@ if(jQuery.browser.msie)
     <li>Add support for <code>:active</code> (in IE) and <code>:focus</code>.</li>
     <li>Implement Transition Events.</li>
 </ul>
+
+<p><em>(Also, for historical purposes I've commited the <a href="http://westonruter.github.com/jquery-css-transitions/wordpress-comment-archive.html">comments</a> from my WordPress blog post on this topic since I'm now redirecting to GitHub.)</em></p>
