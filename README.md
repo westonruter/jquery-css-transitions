@@ -1,6 +1,6 @@
 <h1>CSS Transitions via jQuery Animation</h1>
 
-<p><em>(This project was published back in January 2009, and since the browser landscape has significantly changed. This code is made available here for historical purproses but it is not advisable to incorporate.)</em></p>
+<p><em>(This project was published back in January 2009, and since the browser landscape has significantly changed. This code is made available here for historical purproses but it is not advisable to incorporate. I've also posted here the <a href="http://westonruter.github.com/jquery-css-transitions/wordpress-comment-archive.html">old comments</a> from my blog since I'm now redirecting here.)</em></p>
 
 <p>The WebKit team has been developing some cutting-edge <a href="http://webkit.org/specs/CSSVisualEffects/" title="CSS Effects proposed specifications">proposals</a> to extend CSS with the ability to do declarative animations and other effects. This ability is key to maintaining the <a href="http://www.sitepoint.com/article/simply-javascript/" title="Simply JavaScript: The Three Layers of the Web">three-fold separation</a> of HTML content, CSS presentation, and JavaScript behavior. Animation effects on the Web today are accomplished with JavaScript code which repeatedly changes an element's style at a certain interval in order to create an animated effect. This practice, however, violates the separation between presentation and behavior because the animation behaviors are directly changing the document's presentation (i.e. modifying the <code>style</code> property). Ideally, all of the animation triggers and presentation states would be declared in CSS. And this is exactly what the WebKit team has <a href="http://webkit.org/blog/138/css-animation/" title="CSS Animation @ Surfin' Safari">proposed</a> in its <a href="http://webkit.org/specs/CSSVisualEffects/CSSTransitions.html">CSS Transitions</a> specification.</p>
 
@@ -43,5 +43,3 @@ if(jQuery.browser.msie)
     <li>Add support for <code>:active</code> (in IE) and <code>:focus</code>.</li>
     <li>Implement Transition Events.</li>
 </ul>
-
-<p><em>(Also, for historical purposes I've commited the <a href="http://westonruter.github.com/jquery-css-transitions/wordpress-comment-archive.html">comments</a> from my WordPress blog post on this topic since I'm now redirecting to GitHub.)</em></p>
