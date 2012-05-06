@@ -43,3 +43,6 @@ if(jQuery.browser.msie)
     <li>Add support for <code>:active</code> (in IE) and <code>:focus</code>.</li>
     <li>Implement Transition Events.</li>
 </ul>
+
+<hr>
+<p>Developed by <a href="http://westonruter.github.com/" rel="author">Weston Ruter</a> (<a href="https://twitter.com/westonruter">@westonruter</a>).</p>
