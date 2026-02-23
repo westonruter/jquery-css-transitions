@@ -64,7 +64,9 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         
         $('#addParagraph').click(function(){
             $('#foo').append($('#foo p:first').clone());
-            cssTransitions.refreshDOMForMSIE();
+            if ( window.cssTransitions ) {
+                window.cssTransitions.refreshDOMForMSIE();
+            }
         });
     
         
