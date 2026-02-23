@@ -1,6 +1,6 @@
 <h1>CSS Transitions via jQuery Animation</h1>
 
-<p><em>(This project was published back in January 2009, and since the browser landscape has significantly changed. This code is made available here for historical purproses but it is not advisable to incorporate. I've also posted here the <a href="http://westonruter.github.com/jquery-css-transitions/wordpress-comment-archive.html">old comments</a> from my blog since I'm now redirecting here.)</em></p>
+<p><em>(This project was published back in January 2009, and since the browser landscape has significantly changed. This code is made available here for historical purproses but it is not advisable to incorporate. I've also posted here the <a href="http://westonruter.github.io/jquery-css-transitions/wordpress-comment-archive.html">old comments</a> from my blog since I'm now redirecting here.)</em></p>
 
 <p>The WebKit team has been developing some cutting-edge <a href="http://webkit.org/specs/CSSVisualEffects/" title="CSS Effects proposed specifications">proposals</a> to extend CSS with the ability to do declarative animations and other effects. This ability is key to maintaining the <a href="http://www.sitepoint.com/article/simply-javascript/" title="Simply JavaScript: The Three Layers of the Web">three-fold separation</a> of HTML content, CSS presentation, and JavaScript behavior. Animation effects on the Web today are accomplished with JavaScript code which repeatedly changes an element's style at a certain interval in order to create an animated effect. This practice, however, violates the separation between presentation and behavior because the animation behaviors are directly changing the document's presentation (i.e. modifying the <code>style</code> property). Ideally, all of the animation triggers and presentation states would be declared in CSS. And this is exactly what the WebKit team has <a href="http://webkit.org/blog/138/css-animation/" title="CSS Animation @ Surfin' Safari">proposed</a> in its <a href="http://webkit.org/specs/CSSVisualEffects/CSSTransitions.html">CSS Transitions</a> specification.</p>
 
@@ -32,7 +32,7 @@ if(jQuery.browser.msie)
     <li><p>Likewise, a similar workaround was built into the script to support <code>:hover</code> selectors for transition rules in IE. If another element is dynamically added to the page after the DOM is loaded, you must call <code>cssTransitions.refreshDOMForMSIE()</code>. Currently neither the <code>:active</code> nor <code>:target</code> pseudo classes are working in IE for transition rules.</p></li>
 </ol>
 
-<p>See a <strong><a href="http://westonruter.github.com/jquery-css-transitions/example.html">lightweight example</a></strong>.</p>
+<p>See a <strong><a href="http://westonruter.github.io/jquery-css-transitions/example.html">lightweight example</a></strong>.</p>
 
 <h3 id="todo">Unimplemented Features and To-do Items</h3>
 <ul>
