@@ -38,4 +38,4 @@ if(jQuery.browser.msie)
 </ul>
 
 <hr>
-<p>Developed by <a href="https://plus.google.com/113853198722136596993" rel="author">Weston Ruter</a> (<a href="https://twitter.com/westonruter">@westonruter</a>).</p>
+<p>Developed by <a href="https://weston.ruter.net/" rel="author">Weston Ruter</a> (<a href="https://twitter.com/westonruter">@westonruter</a>), January 2009</p>
